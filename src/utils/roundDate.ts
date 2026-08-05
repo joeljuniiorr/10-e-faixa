@@ -32,3 +32,37 @@ export function formatRoundDate(date: Date) {
     formattedDate.slice(1)
   )
 }
+
+export type ConfirmationWindowStatus =
+  | 'not-started'
+  | 'open'
+  | 'closed'
+
+export function getConfirmationWindow(
+  roundDate: Date,
+  referenceDate = new Date(),
+) {
+  const opensAt = new Date(roundDate)
+  opensAt.setDate(roundDate.getDate() - 6)
+  opensAt.setHours(21, 0, 0, 0)
+
+  const closesAt = new Date(roundDate)
+  closesAt.setHours(16, 0, 0, 0)
+
+  let status: ConfirmationWindowStatus = 'open'
+
+  if (referenceDate < opensAt) {
+    status = 'not-started'
+  }
+
+  if (referenceDate >= closesAt) {
+  status = 'closed'
+}
+
+  return {
+    opensAt,
+    closesAt,
+    status,
+    isOpen: status === 'open',
+  }
+}

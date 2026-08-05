@@ -7,6 +7,7 @@ import {
 } from './data/players'
 import {
   formatRoundDate,
+  getConfirmationWindow,
   getNextRoundDate,
 } from './utils/roundDate'
 import './App.css'
@@ -44,10 +45,40 @@ function getInitialPlayers(): Player[] {
 function App() {
   const [players, setPlayers] = useState(getInitialPlayers)
 
-  const nextRoundDate = getNextRoundDate()
+  const referenceDate = new Date()
 
-  const formattedRoundDate =
-    formatRoundDate(nextRoundDate)
+const nextRoundDate = getNextRoundDate(referenceDate)
+
+const formattedRoundDate =
+  formatRoundDate(nextRoundDate)
+
+const confirmationWindow = getConfirmationWindow(
+  nextRoundDate,
+  referenceDate,
+)
+
+const isConfirmationOpen = confirmationWindow.isOpen
+
+let confirmationStatusText = 'Confirmações abertas'
+
+let confirmationDeadlineText =
+  'Você pode responder ou alterar sua escolha até segunda-feira, às 16h.'
+
+if (confirmationWindow.status === 'not-started') {
+  confirmationStatusText =
+    'Confirmações ainda não abertas'
+
+  confirmationDeadlineText =
+    'As confirmações abrem na terça-feira, às 21h.'
+}
+
+if (confirmationWindow.status === 'closed') {
+  confirmationStatusText =
+    'Confirmações encerradas'
+
+  confirmationDeadlineText =
+    'O prazo de confirmação encerrou na segunda-feira, às 16h.'
+}
  
   const currentPlayer = players.find(
     (player) => player.id === currentPlayerId,
@@ -80,21 +111,25 @@ function App() {
   ).length
 
   function handleConfirmation(
-    newConfirmation: Exclude<ConfirmationStatus, 'pending'>,
-  ) {
-    setPlayers((currentPlayers) =>
-      currentPlayers.map((player) => {
-        if (player.id === currentPlayerId) {
-          return {
-            ...player,
-            confirmation: newConfirmation,
-          }
-        }
-
-        return player
-      }),
-    )
+  newConfirmation: Exclude<ConfirmationStatus, 'pending'>,
+) {
+  if (!isConfirmationOpen) {
+    return
   }
+
+  setPlayers((currentPlayers) =>
+    currentPlayers.map((player) => {
+      if (player.id === currentPlayerId) {
+        return {
+          ...player,
+          confirmation: newConfirmation,
+        }
+      }
+
+      return player
+    }),
+  )
+}
 
     return (
     <main className="app">
@@ -115,7 +150,9 @@ function App() {
       <section className="match-card">
         <div className="match-card__header">
           <div>
-            <span className="status">Confirmações abertas</span>
+            <span className="status">
+              {confirmationStatusText}
+            </span>
             <h2>Você vai jogar?</h2>
           </div>
 
@@ -123,7 +160,7 @@ function App() {
         </div>
 
         <p className="deadline">
-          Você pode responder ou alterar sua escolha até segunda-feira, às 16h.
+          {confirmationDeadlineText}
         </p>
 
         <div className="confirmation-actions">
@@ -134,6 +171,7 @@ function App() {
                 : ''
             }`}
             type="button"
+            disabled={!isConfirmationOpen}
             aria-pressed={currentPlayer?.confirmation === 'inside'}
             onClick={() => handleConfirmation('inside')}
           >
@@ -147,6 +185,7 @@ function App() {
                 : ''
             }`}
             type="button"
+            disabled={!isConfirmationOpen}
             aria-pressed={currentPlayer?.confirmation === 'outside'}
             onClick={() => handleConfirmation('outside')}
           >
