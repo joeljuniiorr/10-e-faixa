@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PlayerList } from './components/PlayerList'
 import {
   initialPlayers,
   type ConfirmationStatus,
@@ -43,19 +44,7 @@ function App() {
     )
   }
 
-  function getConfirmationLabel(status: ConfirmationStatus) {
-    if (status === 'inside') {
-      return 'Dentro'
-    }
-
-    if (status === 'outside') {
-      return 'Fora'
-    }
-
-    return 'Pendente'
-  }
-
-  return (
+    return (
     <main className="app">
       <header className="app-header">
         <span className="brand">10 e Faixa</span>
@@ -153,42 +142,8 @@ function App() {
         </div>
       </section>
 
-      <section className="players-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Futebol da Raça</p>
-            <h2>Mensalistas</h2>
-          </div>
-        </div>
-
-        <ul className="players-list">
-          {players.map((player) => (
-            <li className="player-item" key={player.id}>
-              <div className="player-information">
-                <span className="player-avatar">
-                  {player.name.charAt(0)}
-                </span>
-
-                <div>
-                  <strong>{player.name}</strong>
-
-                  <span className="player-role">
-                    {player.role === 'admin'
-                      ? 'Administrador'
-                      : 'Mensalista'}
-                  </span>
-                </div>
-              </div>
-
-              <span
-                className={`confirmation-badge confirmation-badge--${player.confirmation}`}
-              >
-                {getConfirmationLabel(player.confirmation)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+     <PlayerList players={players} />
+     
     </main>
   )
 }
