@@ -1,19 +1,65 @@
 import { useState } from 'react'
+import {
+  initialPlayers,
+  type ConfirmationStatus,
+} from './data/players'
 import './App.css'
 
 function App() {
-  const [confirmation, setConfirmation] = useState<
-  'inside' | 'outside' | null
->(null)
+  const [players, setPlayers] = useState(initialPlayers)
 
-const insideCount = 10 + (confirmation === 'inside' ? 1 : 0)
-const outsideCount = 4 + (confirmation === 'outside' ? 1 : 0)
-const pendingCount = confirmation === null ? 2 : 1
+  const currentPlayerId = 1
+
+  const currentPlayer = players.find(
+    (player) => player.id === currentPlayerId,
+  )
+
+  const insideCount = players.filter(
+    (player) => player.confirmation === 'inside',
+  ).length
+
+  const outsideCount = players.filter(
+    (player) => player.confirmation === 'outside',
+  ).length
+
+  const pendingCount = players.filter(
+    (player) => player.confirmation === 'pending',
+  ).length
+
+  function handleConfirmation(
+    newConfirmation: Exclude<ConfirmationStatus, 'pending'>,
+  ) {
+    setPlayers((currentPlayers) =>
+      currentPlayers.map((player) => {
+        if (player.id === currentPlayerId) {
+          return {
+            ...player,
+            confirmation: newConfirmation,
+          }
+        }
+
+        return player
+      }),
+    )
+  }
+
+  function getConfirmationLabel(status: ConfirmationStatus) {
+    if (status === 'inside') {
+      return 'Dentro'
+    }
+
+    if (status === 'outside') {
+      return 'Fora'
+    }
+
+    return 'Pendente'
+  }
 
   return (
     <main className="app">
       <header className="app-header">
         <span className="brand">10 e Faixa</span>
+
         <button className="profile-button" type="button">
           JR
         </button>
@@ -42,33 +88,41 @@ const pendingCount = confirmation === null ? 2 : 1
         <div className="confirmation-actions">
           <button
             className={`confirmation-button confirmation-button--inside ${
-              confirmation === 'inside' ? 'confirmation-button--selected' : ''
+              currentPlayer?.confirmation === 'inside'
+                ? 'confirmation-button--selected'
+                : ''
             }`}
             type="button"
-            aria-pressed={confirmation === 'inside'}
-            onClick={() => setConfirmation('inside')}
+            aria-pressed={currentPlayer?.confirmation === 'inside'}
+            onClick={() => handleConfirmation('inside')}
           >
             Dentro
           </button>
-          
+
           <button
             className={`confirmation-button confirmation-button--outside ${
-              confirmation === 'outside' ? 'confirmation-button--selected' : ''
+              currentPlayer?.confirmation === 'outside'
+                ? 'confirmation-button--selected'
+                : ''
             }`}
             type="button"
-            aria-pressed={confirmation === 'outside'}
-            onClick={() => setConfirmation('outside')}
+            aria-pressed={currentPlayer?.confirmation === 'outside'}
+            onClick={() => handleConfirmation('outside')}
           >
             Fora
           </button>
         </div>
 
         <p className="confirmation-feedback" aria-live="polite">
-          {confirmation === null && 'Você ainda não respondeu.'}
-          {confirmation === 'inside' && 'Sua resposta atual: Dentro.'}
-          {confirmation === 'outside' && 'Sua resposta atual: Fora.'}
-        </p>
+          {currentPlayer?.confirmation === 'pending' &&
+            'Você ainda não respondeu.'}
 
+          {currentPlayer?.confirmation === 'inside' &&
+            'Sua resposta atual: Dentro.'}
+
+          {currentPlayer?.confirmation === 'outside' &&
+            'Sua resposta atual: Fora.'}
+        </p>
       </section>
 
       <section className="summary-card">
@@ -78,7 +132,7 @@ const pendingCount = confirmation === null ? 2 : 1
             <h2>Confirmações</h2>
           </div>
 
-          <span>16 jogadores</span>
+          <span>{players.length} jogadores</span>
         </div>
 
         <div className="summary-list">
@@ -97,6 +151,43 @@ const pendingCount = confirmation === null ? 2 : 1
             <span>Pendentes</span>
           </div>
         </div>
+      </section>
+
+      <section className="players-card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Futebol da Raça</p>
+            <h2>Mensalistas</h2>
+          </div>
+        </div>
+
+        <ul className="players-list">
+          {players.map((player) => (
+            <li className="player-item" key={player.id}>
+              <div className="player-information">
+                <span className="player-avatar">
+                  {player.name.charAt(0)}
+                </span>
+
+                <div>
+                  <strong>{player.name}</strong>
+
+                  <span className="player-role">
+                    {player.role === 'admin'
+                      ? 'Administrador'
+                      : 'Mensalista'}
+                  </span>
+                </div>
+              </div>
+
+              <span
+                className={`confirmation-badge confirmation-badge--${player.confirmation}`}
+              >
+                {getConfirmationLabel(player.confirmation)}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
     </main>
   )

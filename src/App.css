@@ -203,3 +203,95 @@
   font-weight: 700;
   text-align: center;
 }
+
+.players-card {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid #e3e8e4;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 32px rgb(25 44 31 / 8%);
+}
+
+.players-list {
+  display: grid;
+  gap: 4px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf0ed;
+}
+
+.player-item:last-child {
+  border-bottom: 0;
+}
+
+.player-information {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.player-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ecf8ef;
+  color: #1d753d;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.player-information strong,
+.player-role {
+  display: block;
+}
+
+.player-information strong {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-role {
+  margin-top: 3px;
+  color: #7a847d;
+  font-size: 0.75rem;
+}
+
+.confirmation-badge {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.confirmation-badge--inside {
+  background: #ecf8ef;
+  color: #1d753d;
+}
+
+.confirmation-badge--outside {
+  background: #f5eeee;
+  color: #a33d3d;
+}
+
+.confirmation-badge--pending {
+  background: #f3f3ed;
+  color: #777548;
+}
