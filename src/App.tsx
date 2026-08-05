@@ -5,6 +5,10 @@ import {
   type ConfirmationStatus,
   type Player,
 } from './data/players'
+import {
+  formatRoundDate,
+  getNextRoundDate,
+} from './utils/roundDate'
 import './App.css'
 
 const currentPlayerId = 1
@@ -39,6 +43,11 @@ function getInitialPlayers(): Player[] {
 
 function App() {
   const [players, setPlayers] = useState(getInitialPlayers)
+
+  const nextRoundDate = getNextRoundDate()
+
+  const formattedRoundDate =
+    formatRoundDate(nextRoundDate)
  
   const currentPlayer = players.find(
     (player) => player.id === currentPlayerId,
@@ -100,7 +109,7 @@ function App() {
       <section className="welcome">
         <p className="eyebrow">Próxima rodada</p>
         <h1>Futebol da Raça</h1>
-        <p>Segunda-feira, das 20h às 21h</p>
+        <p>{formattedRoundDate} · 20h às 21h</p>
       </section>
 
       <section className="match-card">
