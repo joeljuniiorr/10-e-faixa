@@ -173,3 +173,33 @@
     padding-top: 48px;
   }
 }
+
+.confirmation-button {
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    opacity 150ms ease;
+}
+
+.confirmation-button:hover {
+  transform: translateY(-1px);
+}
+
+.confirmation-button--selected {
+  box-shadow: 0 0 0 4px rgb(38 140 75 / 18%);
+}
+
+.confirmation-button--outside.confirmation-button--selected {
+  border-color: #344039;
+  background: #344039;
+  color: #ffffff;
+}
+
+.confirmation-feedback {
+  min-height: 21px;
+  margin: 14px 0 0;
+  color: #344039;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+}

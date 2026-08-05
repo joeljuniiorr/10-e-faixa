@@ -1,6 +1,15 @@
+import { useState } from 'react'
 import './App.css'
 
 function App() {
+  const [confirmation, setConfirmation] = useState<
+  'inside' | 'outside' | null
+>(null)
+
+const insideCount = 10 + (confirmation === 'inside' ? 1 : 0)
+const outsideCount = 4 + (confirmation === 'outside' ? 1 : 0)
+const pendingCount = confirmation === null ? 2 : 1
+
   return (
     <main className="app">
       <header className="app-header">
@@ -31,14 +40,35 @@ function App() {
         </p>
 
         <div className="confirmation-actions">
-          <button className="confirmation-button confirmation-button--inside" type="button">
+          <button
+            className={`confirmation-button confirmation-button--inside ${
+              confirmation === 'inside' ? 'confirmation-button--selected' : ''
+            }`}
+            type="button"
+            aria-pressed={confirmation === 'inside'}
+            onClick={() => setConfirmation('inside')}
+          >
             Dentro
           </button>
-
-          <button className="confirmation-button confirmation-button--outside" type="button">
+          
+          <button
+            className={`confirmation-button confirmation-button--outside ${
+              confirmation === 'outside' ? 'confirmation-button--selected' : ''
+            }`}
+            type="button"
+            aria-pressed={confirmation === 'outside'}
+            onClick={() => setConfirmation('outside')}
+          >
             Fora
           </button>
         </div>
+
+        <p className="confirmation-feedback" aria-live="polite">
+          {confirmation === null && 'Você ainda não respondeu.'}
+          {confirmation === 'inside' && 'Sua resposta atual: Dentro.'}
+          {confirmation === 'outside' && 'Sua resposta atual: Fora.'}
+        </p>
+
       </section>
 
       <section className="summary-card">
@@ -53,17 +83,17 @@ function App() {
 
         <div className="summary-list">
           <div className="summary-item">
-            <strong>10</strong>
+            <strong>{insideCount}</strong>
             <span>Dentro</span>
           </div>
 
           <div className="summary-item">
-            <strong>4</strong>
+            <strong>{outsideCount}</strong>
             <span>Fora</span>
           </div>
 
           <div className="summary-item">
-            <strong>2</strong>
+            <strong>{pendingCount}</strong>
             <span>Pendentes</span>
           </div>
         </div>
