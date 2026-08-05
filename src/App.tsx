@@ -1,19 +1,62 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PlayerList } from './components/PlayerList'
 import {
   initialPlayers,
   type ConfirmationStatus,
+  type Player,
 } from './data/players'
 import './App.css'
 
+const currentPlayerId = 1
+
+const confirmationStorageKey =
+  '10-e-faixa:futebol-da-raca:joel-confirmation'
+
+function getInitialPlayers(): Player[] {
+  const savedConfirmation = localStorage.getItem(
+    confirmationStorageKey,
+  )
+
+  if (
+    savedConfirmation !== 'inside' &&
+    savedConfirmation !== 'outside' &&
+    savedConfirmation !== 'pending'
+  ) {
+    return initialPlayers
+  }
+
+  return initialPlayers.map((player) => {
+    if (player.id === currentPlayerId) {
+      return {
+        ...player,
+        confirmation: savedConfirmation,
+      }
+    }
+
+    return player
+  })
+}
+
 function App() {
-  const [players, setPlayers] = useState(initialPlayers)
-
-  const currentPlayerId = 1
-
+  const [players, setPlayers] = useState(getInitialPlayers)
+ 
   const currentPlayer = players.find(
     (player) => player.id === currentPlayerId,
   )
+
+  const currentPlayerConfirmation =
+  currentPlayer?.confirmation
+
+  useEffect(() => {
+    if (!currentPlayerConfirmation) {
+      return
+    }
+
+    localStorage.setItem(
+      confirmationStorageKey,
+      currentPlayerConfirmation,
+    )
+  }, [currentPlayerConfirmation])
 
   const insideCount = players.filter(
     (player) => player.confirmation === 'inside',
@@ -143,7 +186,7 @@ function App() {
       </section>
 
      <PlayerList players={players} />
-     
+
     </main>
   )
 }
