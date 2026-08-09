@@ -106,4 +106,18 @@ export const initialPlayers: Player[] = [
     role: 'member',
     confirmation: 'pending',
   },
+
+  {
+  id: 17,
+  name: 'Gustavo N.',
+  role: 'member',
+  confirmation: 'pending',
+},
+{
+  id: 18,
+  name: 'Victor M.',
+  role: 'member',
+  confirmation: 'pending',
+},
+
 ]

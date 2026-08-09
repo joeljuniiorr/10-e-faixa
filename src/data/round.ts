@@ -93,4 +93,17 @@ export const initialRoundAssignments: RoundPlayerAssignment[] = [
     team: 'black',
     position: 'goalkeeper',
   },
+
+  {
+  playerId: 17,
+  team: 'blue',
+  position: 'reserve',
+},
+
+{
+  playerId: 18,
+  team: 'black',
+  position: 'reserve',
+},
+
 ]
