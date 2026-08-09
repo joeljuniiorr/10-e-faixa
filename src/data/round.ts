@@ -105,5 +105,9 @@ export const initialRoundAssignments: RoundPlayerAssignment[] = [
   team: 'black',
   position: 'reserve',
 },
-
 ]
+
+export type RoundResult = {
+  blueScore: number
+  blackScore: number
+}

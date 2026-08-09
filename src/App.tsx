@@ -1,4 +1,7 @@
-import { initialRoundAssignments } from './data/round'
+import {
+  initialRoundAssignments,
+  type RoundResult,
+} from './data/round'
 import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router'
 import { BottomNavigation } from './components/BottomNavigation'
@@ -55,7 +58,10 @@ function App() {
   const [roundAssignments, setRoundAssignments] =
   useState(initialRoundAssignments)
 
-  const referenceDate = new Date()
+  const [roundResult, setRoundResult] =
+  useState<RoundResult | null>(null)
+
+const referenceDate = new Date()
 
 const nextRoundDate = getNextRoundDate(referenceDate)
 
@@ -179,6 +185,32 @@ function handleSwapPlayers(
   )
 }
 
+function handleSaveRoundResult(
+  blueScore: number,
+  blackScore: number,
+) {
+  if (
+    !resultsWindow.isOpen ||
+    currentPlayer?.role !== 'admin'
+  ) {
+    return
+  }
+
+  if (
+    blueScore < 0 ||
+    blackScore < 0 ||
+    !Number.isInteger(blueScore) ||
+    !Number.isInteger(blackScore)
+  ) {
+    return
+  }
+
+  setRoundResult({
+    blueScore,
+    blackScore,
+  })
+}
+
 return (
   <main className="app">
     <header className="app-header">
@@ -226,7 +258,9 @@ return (
             isAdmin={currentPlayer?.role === 'admin'}
             players={players}
             assignments={roundAssignments}
+            roundResult={roundResult}
             onSwapPlayers={handleSwapPlayers}
+            onSaveRoundResult={handleSaveRoundResult}
           />
         }
       />
