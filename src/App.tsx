@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router'
 import { BottomNavigation } from './components/BottomNavigation'
 import { GroupPage } from './pages/GroupPage'
 import { HomePage } from './pages/HomePage'
+import { PlayerPage } from './pages/PlayerPage'
 import {
   initialPlayers,
   type ConfirmationStatus,
@@ -175,6 +176,11 @@ return (
       <Route
         path="/grupo"
         element={<GroupPage players={players} />}
+      />
+
+      <Route
+        path="/jogadores/:playerId"
+        element={<PlayerPage players={players} />}
       />
     </Routes>
 

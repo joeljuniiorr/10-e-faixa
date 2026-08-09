@@ -1,3 +1,5 @@
+import { Link } from 'react-router'
+
 import type {
   ConfirmationStatus,
   Player,
@@ -32,28 +34,33 @@ export function PlayerList({ players }: PlayerListProps) {
       <ul className="players-list">
         {players.map((player) => (
           <li className="player-item" key={player.id}>
-            <div className="player-information">
-              <span className="player-avatar">
-                {player.name.charAt(0)}
-              </span>
+  <Link
+    className="player-link"
+    to={`/jogadores/${player.id}`}
+  >
+    <div className="player-information">
+      <span className="player-avatar">
+        {player.name.charAt(0)}
+      </span>
 
-              <div>
-                <strong>{player.name}</strong>
+      <div>
+        <strong>{player.name}</strong>
 
-                <span className="player-role">
-                  {player.role === 'admin'
-                    ? 'Administrador'
-                    : 'Mensalista'}
-                </span>
-              </div>
-            </div>
+        <span className="player-role">
+          {player.role === 'admin'
+            ? 'Administrador'
+            : 'Mensalista'}
+        </span>
+      </div>
+    </div>
 
-            <span
-              className={`confirmation-badge confirmation-badge--${player.confirmation}`}
-            >
-              {getConfirmationLabel(player.confirmation)}
-            </span>
-          </li>
+    <span
+      className={`confirmation-badge confirmation-badge--${player.confirmation}`}
+    >
+      {getConfirmationLabel(player.confirmation)}
+    </span>
+  </Link>
+</li>
         ))}
       </ul>
     </section>
