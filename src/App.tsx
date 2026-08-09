@@ -1,3 +1,4 @@
+import { initialRoundAssignments } from './data/round'
 import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router'
 import { BottomNavigation } from './components/BottomNavigation'
@@ -186,6 +187,8 @@ return (
           <GamesPage
             formattedRoundDate={formattedRoundDate}
             isResultsOpen={resultsWindow.isOpen}
+            players={players}
+            assignments={initialRoundAssignments}
           />
         }
       />

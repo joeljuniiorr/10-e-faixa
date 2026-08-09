@@ -542,3 +542,119 @@
   font-weight: 800;
   cursor: pointer;
 }
+
+.lineup-section {
+  margin-top: 16px;
+}
+
+.lineup-section > .section-heading {
+  margin-bottom: 16px;
+}
+
+.lineup-teams {
+  display: grid;
+  gap: 12px;
+}
+
+.team-lineup-card {
+  overflow: hidden;
+  border: 1px solid #e3e8e4;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 32px rgb(25 44 31 / 8%);
+}
+
+.team-lineup-card--blue {
+  border-top: 4px solid #2563eb;
+}
+
+.team-lineup-card--black {
+  border-top: 4px solid #222b25;
+}
+
+.team-lineup-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px;
+}
+
+.team-lineup-card__header h3 {
+  margin: 6px 0 0;
+  font-size: 1.125rem;
+}
+
+.team-lineup-card__header > span {
+  color: #647067;
+  font-size: 0.75rem;
+}
+
+.team-lineup-list {
+  margin: 0;
+  padding: 0 18px 12px;
+  list-style: none;
+}
+
+.team-lineup-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  border-top: 1px solid #edf0ed;
+}
+
+.team-lineup-player__information {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.team-lineup-player__information strong {
+  overflow: hidden;
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.position-badge {
+  flex: 0 0 auto;
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.position-badge--line {
+  background: #f3f6f4;
+  color: #647067;
+}
+
+.position-badge--reserve {
+  background: #fff5dc;
+  color: #8a6420;
+}
+
+.position-badge--goalkeeper {
+  background: #ecf8ef;
+  color: #1d753d;
+}
+
+.versus-divider {
+  display: grid;
+  place-items: center;
+  min-height: 28px;
+}
+
+.versus-divider span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: #18201b;
+  color: #ffffff;
+  font-weight: 800;
+}
