@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { PlayerList } from './components/PlayerList'
+import { ConfirmationCard } from './components/ConfirmationCard'
 import {
   initialPlayers,
   type ConfirmationStatus,
@@ -147,63 +148,13 @@ if (confirmationWindow.status === 'closed') {
         <p>{formattedRoundDate} · 20h às 21h</p>
       </section>
 
-      <section className="match-card">
-        <div className="match-card__header">
-          <div>
-            <span className="status">
-              {confirmationStatusText}
-            </span>
-            <h2>Você vai jogar?</h2>
-          </div>
-
-          <span className="match-time">20h</span>
-        </div>
-
-        <p className="deadline">
-          {confirmationDeadlineText}
-        </p>
-
-        <div className="confirmation-actions">
-          <button
-            className={`confirmation-button confirmation-button--inside ${
-              currentPlayer?.confirmation === 'inside'
-                ? 'confirmation-button--selected'
-                : ''
-            }`}
-            type="button"
-            disabled={!isConfirmationOpen}
-            aria-pressed={currentPlayer?.confirmation === 'inside'}
-            onClick={() => handleConfirmation('inside')}
-          >
-            Dentro
-          </button>
-
-          <button
-            className={`confirmation-button confirmation-button--outside ${
-              currentPlayer?.confirmation === 'outside'
-                ? 'confirmation-button--selected'
-                : ''
-            }`}
-            type="button"
-            disabled={!isConfirmationOpen}
-            aria-pressed={currentPlayer?.confirmation === 'outside'}
-            onClick={() => handleConfirmation('outside')}
-          >
-            Fora
-          </button>
-        </div>
-
-        <p className="confirmation-feedback" aria-live="polite">
-          {currentPlayer?.confirmation === 'pending' &&
-            'Você ainda não respondeu.'}
-
-          {currentPlayer?.confirmation === 'inside' &&
-            'Sua resposta atual: Dentro.'}
-
-          {currentPlayer?.confirmation === 'outside' &&
-            'Sua resposta atual: Fora.'}
-        </p>
-      </section>
+      <ConfirmationCard
+        currentConfirmation={currentPlayer?.confirmation}
+        isOpen={isConfirmationOpen}
+        statusText={confirmationStatusText}
+        deadlineText={confirmationDeadlineText}
+        onConfirm={handleConfirmation}
+      />
 
       <section className="summary-card">
         <div className="section-heading">
