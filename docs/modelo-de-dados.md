@@ -61,10 +61,57 @@ Estados dependentes de horário, como confirmação aberta ou resultados liberad
 A combinação de `group_id` e `scheduled_at` deve ser única, impedindo duas rodadas do mesmo grupo no mesmo horário.
 
 ### round_confirmations
-Armazena as respostas Dentro/Fora dos jogadores em cada rodada.
+
+Armazena a confirmação de presença de um jogador em uma rodada.
+
+Principais informações:
+
+- `round_id`: rodada relacionada
+- `player_id`: jogador que respondeu
+- `status`: resposta do jogador
+- `updated_at`: momento da última atualização
+
+Os valores persistidos de `status` são:
+
+- `inside`
+- `outside`
+
+O estado `pending` não é armazenado. A ausência de uma confirmação para o jogador naquela rodada representa uma resposta pendente.
+
+A combinação de `round_id` e `player_id` é a chave primária da tabela. Portanto, cada jogador possui no máximo uma confirmação por rodada.
+
+Enquanto a janela de confirmação estiver aberta, a resposta existente poderá ser atualizada de `inside` para `outside` ou vice-versa.
 
 ### round_assignments
-Armazena o time e a posição de cada jogador na rodada.
+
+Armazena a formação de cada rodada.
+
+Cada registro representa um jogador atribuído a um time e posição naquela rodada.
+
+Principais informações:
+
+- `round_id`: rodada relacionada
+- `player_id`: jogador participante
+- `team`: time atribuído
+- `position`: posição na formação
+- `updated_at`: momento da última atualização
+
+Os times iniciais são:
+
+- `blue`
+- `black`
+
+As posições iniciais são:
+
+- `line`
+- `reserve`
+- `goalkeeper`
+
+A combinação de `round_id` e `player_id` forma a chave primária, garantindo que cada jogador possua no máximo uma atribuição por rodada.
+
+A formação pode ser alterada pelo administrador sem criar novos registros para o jogador. Nesse caso, os valores de `team` e/ou `position` são atualizados.
+
+As quantidades específicas de jogadores por time e posição serão tratadas pelas regras da aplicação nesta primeira versão.
 
 ### round_results
 Armazena o placar único da rodada.
