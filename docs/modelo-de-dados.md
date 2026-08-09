@@ -114,7 +114,26 @@ A formação pode ser alterada pelo administrador sem criar novos registros para
 As quantidades específicas de jogadores por time e posição serão tratadas pelas regras da aplicação nesta primeira versão.
 
 ### round_results
-Armazena o placar único da rodada.
+
+Armazena o placar final de uma rodada.
+
+Principais informações:
+
+- `round_id`: rodada relacionada e chave primária
+- `blue_score`: gols do Time Azul
+- `black_score`: gols do Time Preto
+- `updated_by`: jogador responsável pela última alteração
+- `updated_at`: momento da última atualização
+
+Cada rodada pode possuir no máximo um resultado.
+
+Os placares devem ser números inteiros iguais ou maiores que zero.
+
+O vencedor não é armazenado separadamente. Ele deve ser derivado comparando `blue_score` e `black_score`.
+
+Da mesma forma, vitória, derrota ou empate de cada jogador devem ser derivados a partir do resultado da rodada e da sua atribuição em `round_assignments`.
+
+A ausência de um registro em `round_results` representa uma rodada cujo placar ainda não foi registrado.
 
 ## Entidades planejadas para versões futuras
 
