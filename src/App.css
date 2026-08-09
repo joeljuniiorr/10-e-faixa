@@ -658,3 +658,75 @@
   color: #ffffff;
   font-weight: 800;
 }
+
+.lineup-edit-button {
+  border: 0;
+  background: transparent;
+  color: #1d753d;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.lineup-edit-panel {
+  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #ecf8ef;
+}
+
+.lineup-edit-panel p {
+  margin: 0;
+  color: #344039;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.lineup-edit-panel strong {
+  display: block;
+  margin-top: 8px;
+  color: #1d753d;
+  font-size: 0.75rem;
+}
+
+.lineup-edit-panel .primary-action-button {
+  margin-top: 14px;
+}
+
+.lineup-edit-panel .primary-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.team-lineup-player__button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  width: 100%;
+  min-height: 58px;
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.team-lineup-player__button:not(:disabled) {
+  cursor: pointer;
+}
+
+.team-lineup-player__button:disabled {
+  opacity: 1;
+}
+
+.team-lineup-player__button--selected {
+  padding: 0 8px;
+  border-radius: 12px;
+  background: #ecf8ef;
+  outline: 2px solid #268c4b;
+} 

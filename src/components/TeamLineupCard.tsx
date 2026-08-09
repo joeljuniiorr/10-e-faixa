@@ -9,6 +9,9 @@ type TeamLineupCardProps = {
   team: TeamColor
   players: Player[]
   assignments: RoundPlayerAssignment[]
+  isEditing: boolean
+  selectedPlayerId: number | null
+  onSelectPlayer: (playerId: number) => void
 }
 
 function getTeamName(team: TeamColor) {
@@ -35,6 +38,9 @@ export function TeamLineupCard({
   team,
   players,
   assignments,
+  isEditing,
+  selectedPlayerId,
+  onSelectPlayer,
 }: TeamLineupCardProps) {
   const teamAssignments = assignments.filter(
     (assignment) => assignment.team === team,
@@ -69,19 +75,30 @@ export function TeamLineupCard({
               className="team-lineup-player"
               key={player.id}
             >
-              <div className="team-lineup-player__information">
-                <span className="player-avatar">
-                  {player.name.charAt(0)}
-                </span>
-
-                <strong>{player.name}</strong>
-              </div>
-
-              <span
-                className={`position-badge position-badge--${assignment.position}`}
+              <button
+                className={`team-lineup-player__button ${
+                  selectedPlayerId === player.id
+                    ? 'team-lineup-player__button--selected'
+                    : ''
+                }`}
+                type="button"
+                disabled={!isEditing}
+                onClick={() => onSelectPlayer(player.id)}
               >
-                {getPositionLabel(assignment.position)}
-              </span>
+                <div className="team-lineup-player__information">
+                  <span className="player-avatar">
+                    {player.name.charAt(0)}
+                  </span>
+
+                  <strong>{player.name}</strong>
+                </div>
+
+                <span
+                  className={`position-badge position-badge--${assignment.position}`}
+                >
+                  {getPositionLabel(assignment.position)}
+                </span>
+              </button>
             </li>
           )
         })}

@@ -52,6 +52,9 @@ function getInitialPlayers(): Player[] {
 function App() {
   const [players, setPlayers] = useState(getInitialPlayers)
 
+  const [roundAssignments, setRoundAssignments] =
+  useState(initialRoundAssignments)
+
   const referenceDate = new Date()
 
 const nextRoundDate = getNextRoundDate(referenceDate)
@@ -143,6 +146,39 @@ if (confirmationWindow.status === 'closed') {
   )
 }
 
+function handleSwapPlayers(
+  firstPlayerId: number,
+  secondPlayerId: number,
+) {
+  if (currentPlayer?.role !== 'admin') {
+    return
+  }
+
+  if (firstPlayerId === secondPlayerId) {
+    return
+  }
+
+  setRoundAssignments((currentAssignments) =>
+    currentAssignments.map((assignment) => {
+      if (assignment.playerId === firstPlayerId) {
+        return {
+          ...assignment,
+          playerId: secondPlayerId,
+        }
+      }
+
+      if (assignment.playerId === secondPlayerId) {
+        return {
+          ...assignment,
+          playerId: firstPlayerId,
+        }
+      }
+
+      return assignment
+    }),
+  )
+}
+
 return (
   <main className="app">
     <header className="app-header">
@@ -187,8 +223,10 @@ return (
           <GamesPage
             formattedRoundDate={formattedRoundDate}
             isResultsOpen={resultsWindow.isOpen}
+            isAdmin={currentPlayer?.role === 'admin'}
             players={players}
-            assignments={initialRoundAssignments}
+            assignments={roundAssignments}
+            onSwapPlayers={handleSwapPlayers}
           />
         }
       />
