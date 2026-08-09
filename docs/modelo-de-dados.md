@@ -34,7 +34,31 @@ O campo `role` define inicialmente dois papéis:
 O campo `active` permite retirar um jogador do grupo sem apagar seu histórico.
 
 ### rounds
+
 Representa cada ocorrência semanal de uma pelada.
+
+Cada rodada pertence a um grupo e armazena os horários que controlam seu ciclo.
+
+Principais informações:
+
+- `group_id`: grupo responsável pela rodada
+- `scheduled_at`: início da partida
+- `ends_at`: término previsto da partida
+- `confirmation_opens_at`: abertura das confirmações
+- `confirmation_closes_at`: encerramento das confirmações
+- `results_open_at`: liberação do registro de resultados e início das avaliações
+- `evaluation_closes_at`: prazo padrão para encerramento das avaliações
+- `status`: estado administrativo da rodada
+
+Os estados administrativos iniciais são:
+
+- `scheduled`
+- `finalized`
+- `cancelled`
+
+Estados dependentes de horário, como confirmação aberta ou resultados liberados, devem ser derivados dos horários da rodada em vez de armazenados separadamente.
+
+A combinação de `group_id` e `scheduled_at` deve ser única, impedindo duas rodadas do mesmo grupo no mesmo horário.
 
 ### round_confirmations
 Armazena as respostas Dentro/Fora dos jogadores em cada rodada.
