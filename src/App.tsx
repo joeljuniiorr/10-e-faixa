@@ -272,7 +272,13 @@ return (
 
       <Route
         path="/jogadores/:playerId"
-        element={<PlayerPage players={players} />}
+        element={
+          <PlayerPage
+            players={players}
+            assignments={roundAssignments}
+            roundResult={roundResult}
+          />
+        }
       />
     </Routes>
 
