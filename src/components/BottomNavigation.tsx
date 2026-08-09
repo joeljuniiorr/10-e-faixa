@@ -21,6 +21,19 @@ export function BottomNavigation() {
       </NavLink>
 
       <NavLink
+            className={({ isActive }) =>
+                `bottom-navigation__link ${
+                isActive
+                    ? 'bottom-navigation__link--active'
+                    : ''
+                }`
+            }
+            to="/jogos"
+            >
+            Jogos
+        </NavLink>
+
+      <NavLink
         className={({ isActive }) =>
           `bottom-navigation__link ${
             isActive

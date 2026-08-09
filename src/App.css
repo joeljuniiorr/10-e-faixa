@@ -345,7 +345,7 @@
   z-index: 10;
 
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 
   max-width: 448px;
   margin: 0 auto;
@@ -467,4 +467,78 @@
 
 .empty-state p {
   color: #647067;
+}
+
+.games-round-card,
+.games-empty-card {
+  padding: 22px;
+  border: 1px solid #e3e8e4;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 32px rgb(25 44 31 / 8%);
+}
+
+.games-round-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.games-round-card h2 {
+  margin: 8px 0 4px;
+  font-size: 1.125rem;
+}
+
+.games-round-card div > p:last-child {
+  margin: 0;
+  color: #647067;
+  font-size: 0.875rem;
+}
+
+.results-status {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.results-status--open {
+  background: #ecf8ef;
+  color: #1d753d;
+}
+
+.results-status--waiting {
+  background: #f3f3ed;
+  color: #777548;
+}
+
+.games-empty-card {
+  margin-top: 16px;
+}
+
+.games-empty-card h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.games-empty-card p {
+  margin: 10px 0 0;
+  color: #647067;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.primary-action-button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: 14px;
+  background: #268c4b;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  cursor: pointer;
 }

@@ -66,3 +66,16 @@ export function getConfirmationWindow(
     isOpen: status === 'open',
   }
 }
+
+export function getResultsWindow(
+  roundDate: Date,
+  referenceDate = new Date(),
+) {
+  const opensAt = new Date(roundDate)
+  opensAt.setHours(21, 0, 0, 0)
+
+  return {
+    opensAt,
+    isOpen: referenceDate >= opensAt,
+  }
+}

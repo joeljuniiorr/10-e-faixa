@@ -4,6 +4,7 @@ import { BottomNavigation } from './components/BottomNavigation'
 import { GroupPage } from './pages/GroupPage'
 import { HomePage } from './pages/HomePage'
 import { PlayerPage } from './pages/PlayerPage'
+import { GamesPage } from './pages/GamesPage'
 import {
   initialPlayers,
   type ConfirmationStatus,
@@ -13,6 +14,7 @@ import {
   formatRoundDate,
   getConfirmationWindow,
   getNextRoundDate,
+  getResultsWindow,
 } from './utils/roundDate'
 import './App.css'
 
@@ -57,6 +59,11 @@ const formattedRoundDate =
   formatRoundDate(nextRoundDate)
 
 const confirmationWindow = getConfirmationWindow(
+  nextRoundDate,
+  referenceDate,
+)
+
+const resultsWindow = getResultsWindow(
   nextRoundDate,
   referenceDate,
 )
@@ -169,6 +176,16 @@ return (
             pendingCount={pendingCount}
             playersCount={players.length}
             onConfirm={handleConfirmation}
+          />
+        }
+      />
+
+      <Route
+        path="/jogos"
+        element={
+          <GamesPage
+            formattedRoundDate={formattedRoundDate}
+            isResultsOpen={resultsWindow.isOpen}
           />
         }
       />
