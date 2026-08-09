@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { PlayerList } from './components/PlayerList'
-import { ConfirmationCard } from './components/ConfirmationCard'
+import { Route, Routes } from 'react-router'
+import { BottomNavigation } from './components/BottomNavigation'
+import { GroupPage } from './pages/GroupPage'
+import { HomePage } from './pages/HomePage'
 import {
   initialPlayers,
   type ConfirmationStatus,
@@ -132,62 +134,53 @@ if (confirmationWindow.status === 'closed') {
   )
 }
 
-    return (
-    <main className="app">
-      <header className="app-header">
-        <span className="brand">10 e Faixa</span>
+return (
+  <main className="app">
+    <header className="app-header">
+      <span className="brand">10 e Faixa</span>
 
-        <button className="profile-button" type="button">
-          JR
-        </button>
-      </header>
+      <button
+        className="profile-button"
+        type="button"
+      >
+        JR
+      </button>
+    </header>
 
-      <section className="welcome">
-        <p className="eyebrow">Próxima rodada</p>
-        <h1>Futebol da Raça</h1>
-        <p>{formattedRoundDate} · 20h às 21h</p>
-      </section>
-
-      <ConfirmationCard
-        currentConfirmation={currentPlayer?.confirmation}
-        isOpen={isConfirmationOpen}
-        statusText={confirmationStatusText}
-        deadlineText={confirmationDeadlineText}
-        onConfirm={handleConfirmation}
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <HomePage
+            formattedRoundDate={formattedRoundDate}
+            currentConfirmation={
+              currentPlayer?.confirmation
+            }
+            isConfirmationOpen={isConfirmationOpen}
+            confirmationStatusText={
+              confirmationStatusText
+            }
+            confirmationDeadlineText={
+              confirmationDeadlineText
+            }
+            insideCount={insideCount}
+            outsideCount={outsideCount}
+            pendingCount={pendingCount}
+            playersCount={players.length}
+            onConfirm={handleConfirmation}
+          />
+        }
       />
 
-      <section className="summary-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Mensalistas</p>
-            <h2>Confirmações</h2>
-          </div>
+      <Route
+        path="/grupo"
+        element={<GroupPage players={players} />}
+      />
+    </Routes>
 
-          <span>{players.length} jogadores</span>
-        </div>
-
-        <div className="summary-list">
-          <div className="summary-item">
-            <strong>{insideCount}</strong>
-            <span>Dentro</span>
-          </div>
-
-          <div className="summary-item">
-            <strong>{outsideCount}</strong>
-            <span>Fora</span>
-          </div>
-
-          <div className="summary-item">
-            <strong>{pendingCount}</strong>
-            <span>Pendentes</span>
-          </div>
-        </div>
-      </section>
-
-     <PlayerList players={players} />
-
-    </main>
-  )
+    <BottomNavigation />
+  </main>
+)
 }
 
 export default App
