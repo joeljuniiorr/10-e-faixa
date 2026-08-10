@@ -987,3 +987,27 @@
   font-size: 0.875rem;
   line-height: 1.5;
 }
+
+.authenticated-player-card {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f3f6f4;
+}
+
+.authenticated-player-card span {
+  color: #647067;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.authenticated-player-card strong {
+  font-size: 1.125rem;
+}
+
+.authenticated-player-card small {
+  color: #647067;
+  font-size: 0.75rem;
+}

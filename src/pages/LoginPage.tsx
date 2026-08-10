@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+type AuthenticatedPlayer = {
+  id: string
+  name: string
+  nickname: string | null
+}
+
 export function LoginPage() {
+  const [player, setPlayer] =
+  useState<AuthenticatedPlayer | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -29,11 +37,41 @@ export function LoginPage() {
     setIsLoading(false)
   }
 
+  async function loadAuthenticatedPlayer(
+  userId: string,
+) {
+  const { data, error } = await supabase
+    .from('players')
+    .select('id, name, nickname')
+    .eq('auth_user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    setMessage(
+      `Login realizado, mas não foi possível carregar o jogador: ${error.message}`,
+    )
+
+    return false
+  }
+
+  if (!data) {
+    setMessage(
+      'Login realizado, mas nenhum jogador foi encontrado para esta conta.',
+    )
+
+    return false
+  }
+
+  setPlayer(data)
+
+  return true
+}
+
   async function handleSignIn() {
     setIsLoading(true)
     setMessage('')
 
-    const { error } =
+    const { data, error } =
       await supabase.auth.signInWithPassword({
         email,
         password,
@@ -45,9 +83,24 @@ export function LoginPage() {
       return
     }
 
-    setMessage('Login realizado com sucesso.')
+    if (!data.user) {
+  setMessage(
+    'O login foi realizado, mas o usuário não foi encontrado.',
+  )
 
-    setIsLoading(false)
+  setIsLoading(false)
+  return
+}
+
+const playerLoaded =
+  await loadAuthenticatedPlayer(data.user.id)
+
+if (playerLoaded) {
+  setMessage('Login realizado com sucesso.')
+}
+
+setIsLoading(false)
+
   }
 
   return (
@@ -111,6 +164,20 @@ export function LoginPage() {
             <p className="login-message">
               {message}
             </p>
+          )}
+
+          {player && (
+            <div className="authenticated-player-card">
+              <span>Jogador conectado</span>
+
+              <strong>
+                {player.nickname ?? player.name}
+              </strong>
+
+              {player.nickname && (
+                <small>{player.name}</small>
+              )}
+            </div>
           )}
         </div>
       </div>
