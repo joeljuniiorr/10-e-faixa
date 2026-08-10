@@ -1,22 +1,20 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import type {
+  AuthenticatedGroupMembership,
+  AuthenticatedPlayer,
+} from '../types/auth'
 
-type AuthenticatedPlayer = {
-  id: string
-  name: string
-  nickname: string | null
+type LoginPageProps = {
+  onAuthenticated: (
+    player: AuthenticatedPlayer,
+    memberships: AuthenticatedGroupMembership[],
+  ) => void
 }
 
-type AuthenticatedGroupMembership = {
-  role: 'admin' | 'member'
-  active: boolean
-  groups: {
-    id: string
-    name: string
-  } | null
-}
-
-export function LoginPage() {
+export function LoginPage({
+  onAuthenticated,
+}: LoginPageProps) {
   const [player, setPlayer] =
   useState<AuthenticatedPlayer | null>(null)
   const [email, setEmail] = useState('')
@@ -72,7 +70,7 @@ export function LoginPage() {
       `Não foi possível carregar os grupos: ${error.message}`,
     )
 
-    return false
+    return null
   }
 
   if (!data || data.length === 0) {
@@ -80,12 +78,12 @@ export function LoginPage() {
       'Login realizado, mas nenhum grupo ativo foi encontrado para este jogador.',
     )
 
-    return false
+    return null
   }
 
   setGroupMemberships(data)
 
-  return true
+  return data
 }
 
   async function loadAuthenticatedPlayer(
@@ -102,7 +100,7 @@ export function LoginPage() {
       `Login realizado, mas não foi possível carregar o jogador: ${error.message}`,
     )
 
-    return false
+    return null
   }
 
   if (!data) {
@@ -110,19 +108,21 @@ export function LoginPage() {
       'Login realizado, mas nenhum jogador foi encontrado para esta conta.',
     )
 
-    return false
+    return null
   }
 
   setPlayer(data)
 
-  const groupsLoaded =
-    await loadAuthenticatedGroups(data.id)
+  const memberships =
+  await loadAuthenticatedGroups(data.id)
 
-  if (!groupsLoaded) {
-    return false
-  }
+if (!memberships) {
+  return false
+}
 
-  return true
+onAuthenticated(data, memberships)
+
+return true
 }
 
   async function handleSignIn() {

@@ -22,6 +22,11 @@ import {
   getResultsWindow,
 } from './utils/roundDate'
 import './App.css'
+import type {
+  AuthenticatedGroupMembership,
+  AuthenticatedPlayer,
+} from './types/auth'
+
 
 const currentPlayerId = 1
 
@@ -56,6 +61,11 @@ function getInitialPlayers(): Player[] {
 function App() {
   const [players, setPlayers] = useState(getInitialPlayers)
 
+  const [
+  authenticatedGroupMemberships,
+  setAuthenticatedGroupMemberships,
+] = useState<AuthenticatedGroupMembership[]>([])
+
   const [roundAssignments, setRoundAssignments] =
   useState(initialRoundAssignments)
 
@@ -78,6 +88,8 @@ const resultsWindow = getResultsWindow(
   nextRoundDate,
   referenceDate,
 )
+
+
 
 const isConfirmationOpen = confirmationWindow.isOpen
 
@@ -153,6 +165,13 @@ if (confirmationWindow.status === 'closed') {
   )
 }
 
+function handleAuthenticated(
+    _player: AuthenticatedPlayer,
+    memberships: AuthenticatedGroupMembership[],
+  ) {
+    setAuthenticatedGroupMemberships(memberships)
+  }
+
 function handleSwapPlayers(
   firstPlayerId: number,
   secondPlayerId: number,
@@ -212,6 +231,13 @@ function handleSaveRoundResult(
   })
 }
 
+const activeGroup =
+  authenticatedGroupMemberships.find(
+    (membership) =>
+      membership.active &&
+      membership.groups,
+  )?.groups ?? null
+
 return (
   <main className="app">
     <header className="app-header">
@@ -230,6 +256,9 @@ return (
         path="/"
         element={
           <HomePage
+          groupName={
+            activeGroup?.name ?? 'Futebol da Raça'
+          }
             formattedRoundDate={formattedRoundDate}
             currentConfirmation={
               currentPlayer?.confirmation
@@ -251,9 +280,13 @@ return (
       />
 
       <Route
-        path="/entrar"
-        element={<LoginPage />}
-      />
+  path="/entrar"
+  element={
+    <LoginPage
+      onAuthenticated={handleAuthenticated}
+    />
+  }
+/>
 
       <Route
         path="/jogos"

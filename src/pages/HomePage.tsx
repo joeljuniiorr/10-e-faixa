@@ -7,6 +7,7 @@ type ConfirmationChoice = Exclude<
 >
 
 type HomePageProps = {
+  groupName: string
   formattedRoundDate: string
   currentConfirmation: ConfirmationStatus | undefined
   isConfirmationOpen: boolean
@@ -29,13 +30,14 @@ export function HomePage({
   outsideCount,
   pendingCount,
   playersCount,
+  groupName,
   onConfirm,
 }: HomePageProps) {
   return (
     <>
       <section className="welcome">
         <p className="eyebrow">Próxima rodada</p>
-        <h1>Futebol da Raça</h1>
+        <h1>{groupName}</h1>
         <p>{formattedRoundDate} · 20h às 21h</p>
       </section>
 
