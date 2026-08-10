@@ -1011,3 +1011,7 @@
   color: #647067;
   font-size: 0.75rem;
 }
+
+.authenticated-group-card {
+  margin-top: 10px;
+}

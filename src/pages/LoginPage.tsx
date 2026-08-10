@@ -7,6 +7,15 @@ type AuthenticatedPlayer = {
   nickname: string | null
 }
 
+type AuthenticatedGroupMembership = {
+  role: 'admin' | 'member'
+  active: boolean
+  groups: {
+    id: string
+    name: string
+  } | null
+}
+
 export function LoginPage() {
   const [player, setPlayer] =
   useState<AuthenticatedPlayer | null>(null)
@@ -14,6 +23,8 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [groupMemberships, setGroupMemberships] =
+  useState<AuthenticatedGroupMembership[]>([])
 
   async function handleSignUp() {
     setIsLoading(true)
@@ -36,6 +47,46 @@ export function LoginPage() {
 
     setIsLoading(false)
   }
+
+  async function loadAuthenticatedGroups(
+  playerId: string,
+) {
+  const { data, error } = await supabase
+  .from('group_members')
+  .select(`
+    role,
+    active,
+    groups (
+      id,
+      name
+    )
+  `)
+  .eq('player_id', playerId)
+  .eq('active', true)
+  .overrideTypes<
+    AuthenticatedGroupMembership[],
+    { merge: false }
+  >()
+  if (error) {
+    setMessage(
+      `Não foi possível carregar os grupos: ${error.message}`,
+    )
+
+    return false
+  }
+
+  if (!data || data.length === 0) {
+    setMessage(
+      'Login realizado, mas nenhum grupo ativo foi encontrado para este jogador.',
+    )
+
+    return false
+  }
+
+  setGroupMemberships(data)
+
+  return true
+}
 
   async function loadAuthenticatedPlayer(
   userId: string,
@@ -63,6 +114,13 @@ export function LoginPage() {
   }
 
   setPlayer(data)
+
+  const groupsLoaded =
+    await loadAuthenticatedGroups(data.id)
+
+  if (!groupsLoaded) {
+    return false
+  }
 
   return true
 }
@@ -177,6 +235,31 @@ setIsLoading(false)
               {player.nickname && (
                 <small>{player.name}</small>
               )}
+
+              {groupMemberships.map((membership) => {
+  const group = membership.groups
+
+  if (!group) {
+    return null
+  }
+
+  return (
+    <div
+      className="authenticated-player-card authenticated-group-card"
+      key={group.id}
+    >
+      <span>Grupo</span>
+
+      <strong>{group.name}</strong>
+
+      <small>
+        {membership.role === 'admin'
+          ? 'Administrador'
+          : 'Membro'}
+      </small>
+    </div>
+  )
+})}
             </div>
           )}
         </div>
