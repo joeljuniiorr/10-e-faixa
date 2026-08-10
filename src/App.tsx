@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router'
 import { BottomNavigation } from './components/BottomNavigation'
 import { GroupPage } from './pages/GroupPage'
+import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
 import { PlayerPage } from './pages/PlayerPage'
 import { GamesPage } from './pages/GamesPage'
@@ -247,6 +248,11 @@ return (
             onConfirm={handleConfirmation}
           />
         }
+      />
+
+      <Route
+        path="/entrar"
+        element={<LoginPage />}
       />
 
       <Route
