@@ -10,6 +10,7 @@ import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
 import { PlayerPage } from './pages/PlayerPage'
 import { GamesPage } from './pages/GamesPage'
+import { supabase } from './lib/supabase'
 import {
   initialPlayers,
   type ConfirmationStatus,
@@ -131,6 +132,65 @@ if (confirmationWindow.status === 'closed') {
       currentPlayerConfirmation,
     )
   }, [currentPlayerConfirmation])
+
+  useEffect(() => {
+  async function restoreAuthenticatedGroup() {
+    const { data: sessionData } =
+      await supabase.auth.getSession()
+
+    const user = sessionData.session?.user
+
+    if (!user) {
+      return
+    }
+
+    const {
+      data: player,
+      error: playerError,
+    } = await supabase
+      .from('players')
+      .select('id')
+      .eq('auth_user_id', user.id)
+      .maybeSingle()
+
+    if (playerError || !player) {
+      return
+    }
+
+    const {
+      data: memberships,
+      error: membershipsError,
+    } = await supabase
+      .from('group_members')
+      .select(`
+        role,
+        active,
+        groups (
+          id,
+          name
+        )
+      `)
+      .eq('player_id', player.id)
+      .eq('active', true)
+      .overrideTypes<
+        AuthenticatedGroupMembership[],
+        { merge: false }
+      >()
+
+    if (
+      membershipsError ||
+      !memberships
+    ) {
+      return
+    }
+
+    setAuthenticatedGroupMemberships(
+      memberships,
+    )
+  }
+
+  restoreAuthenticatedGroup()
+}, [])
 
   const insideCount = players.filter(
     (player) => player.confirmation === 'inside',
@@ -257,7 +317,7 @@ return (
         element={
           <HomePage
           groupName={
-            activeGroup?.name ?? 'Futebol da Raça'
+            activeGroup?.name ?? '10 e Faixa'
           }
             formattedRoundDate={formattedRoundDate}
             currentConfirmation={
