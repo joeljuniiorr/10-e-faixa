@@ -10,10 +10,13 @@ type LoginPageProps = {
     player: AuthenticatedPlayer,
     memberships: AuthenticatedGroupMembership[],
   ) => void
+
+  onSignedOut: () => void
 }
 
 export function LoginPage({
   onAuthenticated,
+  onSignedOut,
 }: LoginPageProps) {
   const [player, setPlayer] =
   useState<AuthenticatedPlayer | null>(null)
@@ -161,6 +164,34 @@ setIsLoading(false)
 
   }
 
+async function handleSignOut() {
+  setIsLoading(true)
+  setMessage('')
+
+  const { error } = await supabase.auth.signOut({
+    scope: 'local',
+  })
+
+  if (error) {
+    setMessage(
+      `Não foi possível sair da conta: ${error.message}`,
+    )
+
+    setIsLoading(false)
+    return
+  }
+
+  setPlayer(null)
+  setGroupMemberships([])
+  setEmail('')
+  setPassword('')
+
+  onSignedOut()
+
+  setMessage('Você saiu da sua conta.')
+  setIsLoading(false)
+}
+
   return (
     <section className="login-page">
       <div className="login-card">
@@ -217,6 +248,17 @@ setIsLoading(false)
           >
             Criar conta
           </button>
+
+          {player && (
+            <button
+              className="secondary-action-button"
+              type="button"
+              disabled={isLoading}
+              onClick={handleSignOut}
+            >
+              Sair
+            </button>
+          )}
 
           {message && (
             <p className="login-message">

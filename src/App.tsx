@@ -232,6 +232,10 @@ function handleAuthenticated(
     setAuthenticatedGroupMemberships(memberships)
   }
 
+function handleSignedOut() {
+  setAuthenticatedGroupMemberships([])
+}
+
 function handleSwapPlayers(
   firstPlayerId: number,
   secondPlayerId: number,
@@ -344,6 +348,7 @@ return (
   element={
     <LoginPage
       onAuthenticated={handleAuthenticated}
+      onSignedOut={handleSignedOut}
     />
   }
 />
