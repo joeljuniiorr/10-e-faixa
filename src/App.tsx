@@ -3,7 +3,7 @@ import {
   type RoundResult,
 } from './data/round'
 import { useEffect, useState } from 'react'
-import { Route, Routes } from 'react-router'
+import { Route, Routes, Navigate } from 'react-router'
 import { BottomNavigation } from './components/BottomNavigation'
 import { GroupPage } from './pages/GroupPage'
 import { LoginPage } from './pages/LoginPage'
@@ -66,6 +66,11 @@ function App() {
   authenticatedGroupMemberships,
   setAuthenticatedGroupMemberships,
 ] = useState<AuthenticatedGroupMembership[]>([])
+
+const [authStatus, setAuthStatus] =
+  useState<
+    'loading' | 'authenticated' | 'anonymous'
+  >('loading')
 
   const [roundAssignments, setRoundAssignments] =
   useState(initialRoundAssignments)
@@ -140,9 +145,12 @@ if (confirmationWindow.status === 'closed') {
 
     const user = sessionData.session?.user
 
-    if (!user) {
-      return
-    }
+if (!user) {
+  setAuthStatus('anonymous')
+  return
+}
+
+setAuthStatus('authenticated')
 
     const {
       data: player,
@@ -230,10 +238,12 @@ function handleAuthenticated(
     memberships: AuthenticatedGroupMembership[],
   ) {
     setAuthenticatedGroupMemberships(memberships)
+    setAuthStatus('authenticated')
   }
 
 function handleSignedOut() {
   setAuthenticatedGroupMemberships([])
+  setAuthStatus('anonymous')
 }
 
 function handleSwapPlayers(
@@ -302,6 +312,14 @@ const activeGroup =
       membership.groups,
   )?.groups ?? null
 
+if (authStatus === 'loading') {
+  return (
+    <main>
+      <p>Carregando 10 e Faixa...</p>
+    </main>
+  )
+}
+
 return (
   <main className="app">
     <header className="app-header">
@@ -319,6 +337,7 @@ return (
       <Route
         path="/"
         element={
+          authStatus === 'authenticated' ? (
           <HomePage
           groupName={
             activeGroup?.name ?? '10 e Faixa'
@@ -340,6 +359,12 @@ return (
             playersCount={players.length}
             onConfirm={handleConfirmation}
           />
+          ) : (
+            <Navigate
+            to="/entrar"
+            replace
+          />
+          )
         }
       />
 
@@ -355,7 +380,7 @@ return (
 
       <Route
         path="/jogos"
-        element={
+        element={ authStatus === 'authenticated' ? (
           <GamesPage
             formattedRoundDate={formattedRoundDate}
             isResultsOpen={resultsWindow.isOpen}
@@ -366,22 +391,42 @@ return (
             onSwapPlayers={handleSwapPlayers}
             onSaveRoundResult={handleSaveRoundResult}
           />
+        ) : (
+          <Navigate
+        to="/entrar"
+        replace
+        />
+        )
         }
       />
 
       <Route
         path="/grupo"
-        element={<GroupPage players={players} />}
+        element= {  authStatus === 'authenticated' ? (
+        <GroupPage players={players} />
+        ) : (
+          <Navigate
+            to="/entrar"
+            replace
+          />
+        )
+      }
       />
 
       <Route
         path="/jogadores/:playerId"
-        element={
+        element={  authStatus === 'authenticated' ? (
           <PlayerPage
             players={players}
             assignments={roundAssignments}
             roundResult={roundResult}
           />
+        ) : (
+          <Navigate
+            to="/entrar"
+            replace
+            />
+        )
         }
       />
     </Routes>
