@@ -200,6 +200,27 @@ setAuthStatus('authenticated')
   restoreAuthenticatedGroup()
 }, [])
 
+useEffect(() => {
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(
+    (event) => {
+      if (event === 'SIGNED_IN') {
+        setAuthStatus('authenticated')
+      }
+
+      if (event === 'SIGNED_OUT') {
+        setAuthStatus('anonymous')
+        setAuthenticatedGroupMemberships([])
+      }
+    },
+  )
+
+  return () => {
+    subscription.unsubscribe()
+  }
+}, [])
+
   const insideCount = players.filter(
     (player) => player.confirmation === 'inside',
   ).length
