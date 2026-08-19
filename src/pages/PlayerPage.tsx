@@ -85,7 +85,7 @@ export function PlayerPage({
 
   const player = players.find(
     (currentPlayer) =>
-      currentPlayer.id === Number(playerId),
+      currentPlayer.id === playerId,
   )
 
   if (!player) {

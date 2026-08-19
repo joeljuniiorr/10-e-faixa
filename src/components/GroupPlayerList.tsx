@@ -1,3 +1,5 @@
+import { Link } from 'react-router'
+
 export type GroupPlayer = {
   id: string
   name: string
@@ -29,21 +31,26 @@ export function GroupPlayerList({
             className="player-item"
             key={player.id}
           >
-            <div className="player-information">
-              <span className="player-avatar">
-                {player.name.charAt(0)}
-              </span>
-
-              <div>
-                <strong>{player.name}</strong>
-
-                <span className="player-role">
-                  {player.role === 'admin'
-                    ? 'Administrador'
-                    : 'Mensalista'}
+            <Link
+              className="player-link"
+              to={`/jogadores/${player.id}`}
+            >
+              <div className="player-information">
+                <span className="player-avatar">
+                  {player.name.charAt(0)}
                 </span>
+
+                <div>
+                  <strong>{player.name}</strong>
+
+                  <span className="player-role">
+                    {player.role === 'admin'
+                      ? 'Administrador'
+                      : 'Mensalista'}
+                  </span>
+                </div>
               </div>
-            </div>
+            </Link>
           </li>
         ))}
       </ul>

@@ -1,105 +1,15 @@
-import { useEffect, useState } from 'react'
-
-import {
-  GroupPlayerList,
-  type GroupPlayer,
-} from '../components/GroupPlayerList'
-import { supabase } from '../lib/supabase'
+import { GroupPlayerList } from '../components/GroupPlayerList'
+import type { Player } from '../data/players'
 
 type GroupPageProps = {
-  groupId: string | null
   groupName: string
-}
-
-type GroupMembershipRow = {
-  role: 'admin' | 'member'
-  players: {
-    id: string
-    name: string
-    nickname: string | null
-  } | null
+  players: Player[]
 }
 
 export function GroupPage({
-  groupId,
   groupName,
+  players,
 }: GroupPageProps) {
-  const [groupPlayers, setGroupPlayers] =
-    useState<GroupPlayer[]>([])
-
-  const [isLoading, setIsLoading] =
-    useState(true)
-
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null)
-
-  useEffect(() => {
-    async function loadGroupPlayers() {
-      if (!groupId) {
-        setGroupPlayers([])
-        setIsLoading(false)
-        return
-      }
-
-      setIsLoading(true)
-      setErrorMessage(null)
-
-      const { data, error } = await supabase
-        .from('group_members')
-        .select(`
-          role,
-          players (
-            id,
-            name,
-            nickname
-          )
-        `)
-        .eq('group_id', groupId)
-        .eq('active', true)
-        .overrideTypes<
-          GroupMembershipRow[],
-          { merge: false }
-        >()
-
-      if (error) {
-        setErrorMessage(
-          'Não foi possível carregar os jogadores.',
-        )
-
-        setIsLoading(false)
-        return
-      }
-
-      const players = data
-        .filter(
-          (membership) =>
-            membership.players !== null,
-        )
-        .map((membership) => {
-          const player = membership.players!
-
-          return {
-            id: player.id,
-            name:
-              player.nickname ??
-              player.name,
-            role: membership.role,
-          }
-        })
-        .sort((firstPlayer, secondPlayer) =>
-          firstPlayer.name.localeCompare(
-            secondPlayer.name,
-            'pt-BR',
-          ),
-        )
-
-      setGroupPlayers(players)
-      setIsLoading(false)
-    }
-
-    loadGroupPlayers()
-  }, [groupId])
-
   return (
     <section className="group-page">
       <div className="page-heading">
@@ -115,20 +25,7 @@ export function GroupPage({
         </p>
       </div>
 
-      {isLoading && (
-        <p>Carregando jogadores...</p>
-      )}
-
-      {errorMessage && (
-        <p>{errorMessage}</p>
-      )}
-
-      {!isLoading &&
-        !errorMessage && (
-          <GroupPlayerList
-            players={groupPlayers}
-          />
-        )}
+      <GroupPlayerList players={players} />
     </section>
   )
 }

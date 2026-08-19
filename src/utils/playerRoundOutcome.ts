@@ -30,7 +30,7 @@ export function getRoundWinningTeam(
 }
 
 export function getPlayerRoundOutcome(
-  playerId: number,
+  playerId: string,
   assignments: RoundPlayerAssignment[],
   result: RoundResult | null,
 ): PlayerRoundOutcome {

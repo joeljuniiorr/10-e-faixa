@@ -16,8 +16,8 @@ type GamesPageProps = {
   roundResult: RoundResult | null
 
   onSwapPlayers: (
-    firstPlayerId: number,
-    secondPlayerId: number,
+    firstPlayerId: string,
+    secondPlayerId: string,
   ) => void
 
   onSaveRoundResult: (
@@ -40,12 +40,12 @@ export function GamesPage({
     useState(false)
 
   const [selectedPlayerIds, setSelectedPlayerIds] =
-    useState<number[]>([])
+    useState<string[]>([])
 
   const [isScoreFormOpen, setIsScoreFormOpen] =
     useState(false)
 
-  function handleSelectPlayer(playerId: number) {
+  function handleSelectPlayer(playerId: string) {
     setSelectedPlayerIds((currentIds) => {
       if (currentIds.includes(playerId)) {
         return currentIds.filter(

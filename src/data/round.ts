@@ -6,106 +6,66 @@ export type RoundPosition =
   | 'goalkeeper'
 
 export type RoundPlayerAssignment = {
-  playerId: number
+  playerId: string
   team: TeamColor
   position: RoundPosition
 }
 
-export const initialRoundAssignments: RoundPlayerAssignment[] = [
-  {
-    playerId: 1,
-    team: 'blue',
-    position: 'line',
-  },
-  {
-    playerId: 2,
-    team: 'blue',
-    position: 'line',
-  },
-  {
-    playerId: 3,
-    team: 'blue',
-    position: 'line',
-  },
-  {
-    playerId: 4,
-    team: 'blue',
-    position: 'line',
-  },
-  {
-    playerId: 5,
-    team: 'blue',
-    position: 'line',
-  },
-  {
-    playerId: 6,
-    team: 'blue',
-    position: 'line',
-  },
-  {
-    playerId: 7,
-    team: 'blue',
-    position: 'reserve',
-  },
-  {
-    playerId: 8,
-    team: 'blue',
-    position: 'goalkeeper',
-  },
+import type { Player } from './players'
 
-  {
-    playerId: 9,
-    team: 'black',
-    position: 'line',
-  },
-  {
-    playerId: 10,
-    team: 'black',
-    position: 'line',
-  },
-  {
-    playerId: 11,
-    team: 'black',
-    position: 'line',
-  },
-  {
-    playerId: 12,
-    team: 'black',
-    position: 'line',
-  },
-  {
-    playerId: 13,
-    team: 'black',
-    position: 'line',
-  },
-  {
-    playerId: 14,
-    team: 'black',
-    position: 'line',
-  },
-  {
-    playerId: 15,
-    team: 'black',
-    position: 'reserve',
-  },
-  {
-    playerId: 16,
-    team: 'black',
-    position: 'goalkeeper',
-  },
+type InitialRoundAssignment = {
+  playerName: string
+  team: TeamColor
+  position: RoundPosition
+}
 
-  {
-  playerId: 17,
-  team: 'blue',
-  position: 'reserve',
-},
+const initialRoundFormation: InitialRoundAssignment[] = [
+  { playerName: 'Joel', team: 'blue', position: 'line' },
+  { playerName: 'Jeleno', team: 'blue', position: 'line' },
+  { playerName: 'Ambonatti', team: 'blue', position: 'line' },
+  { playerName: 'Tiago G.', team: 'blue', position: 'line' },
+  { playerName: 'Tiago Barriga', team: 'blue', position: 'line' },
+  { playerName: 'Matheus G.', team: 'blue', position: 'line' },
+  { playerName: 'Gustavo S.', team: 'blue', position: 'reserve' },
+  { playerName: 'Samuel', team: 'blue', position: 'goalkeeper' },
+  { playerName: 'Gustavo N.', team: 'blue', position: 'reserve' },
 
-{
-  playerId: 18,
-  team: 'black',
-  position: 'reserve',
-},
+  { playerName: 'Ébone', team: 'black', position: 'line' },
+  { playerName: 'Kailisson', team: 'black', position: 'line' },
+  { playerName: 'Marconi', team: 'black', position: 'line' },
+  { playerName: 'Raffa', team: 'black', position: 'line' },
+  { playerName: 'Levi', team: 'black', position: 'line' },
+  { playerName: 'Willian K.', team: 'black', position: 'line' },
+  { playerName: 'Vini Miranda', team: 'black', position: 'reserve' },
+  { playerName: 'Lucas F.', team: 'black', position: 'goalkeeper' },
+  { playerName: 'Victor M.', team: 'black', position: 'reserve' },
 ]
+
+export function createInitialRoundAssignments(
+  players: Player[],
+): RoundPlayerAssignment[] {
+  return initialRoundFormation.flatMap(
+    (formationPlayer) => {
+      const player = players.find(
+        (currentPlayer) =>
+          currentPlayer.name ===
+          formationPlayer.playerName,
+      )
+
+      if (!player) {
+        return []
+      }
+
+      return [
+        {
+          playerId: player.id,
+          team: formationPlayer.team,
+          position: formationPlayer.position,
+        },
+      ]
+    },
+  )
+}
 
 export type RoundResult = {
   blueScore: number

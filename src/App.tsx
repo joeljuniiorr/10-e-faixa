@@ -1,5 +1,6 @@
 import {
-  initialRoundAssignments,
+  createInitialRoundAssignments,
+  type RoundPlayerAssignment,
   type RoundResult,
 } from './data/round'
 import { useEffect, useState } from 'react'
@@ -11,10 +12,9 @@ import { HomePage } from './pages/HomePage'
 import { PlayerPage } from './pages/PlayerPage'
 import { GamesPage } from './pages/GamesPage'
 import { supabase } from './lib/supabase'
-import {
-  initialPlayers,
-  type ConfirmationStatus,
-  type Player,
+import type {
+  ConfirmationStatus,
+  Player,
 } from './data/players'
 import {
   formatRoundDate,
@@ -34,49 +34,80 @@ const currentPlayerId = 1
 const confirmationStorageKey =
   '10-e-faixa:futebol-da-raca:joel-confirmation'
 
-function getInitialPlayers(): Player[] {
+const confirmationStorageKeyPrefix =
+  '10-e-faixa:confirmation'
+
+function getConfirmationStorageKey(
+  playerId: string,
+) {
+  return `${confirmationStorageKeyPrefix}:${playerId}`
+}
+
+function getSavedConfirmation(
+  playerId: string,
+): ConfirmationStatus {
   const savedConfirmation = localStorage.getItem(
-    confirmationStorageKey,
+    getConfirmationStorageKey(playerId),
   )
 
   if (
-    savedConfirmation !== 'inside' &&
-    savedConfirmation !== 'outside' &&
-    savedConfirmation !== 'pending'
+    savedConfirmation === 'inside' ||
+    savedConfirmation === 'outside' ||
+    savedConfirmation === 'pending'
   ) {
-    return initialPlayers
+    return savedConfirmation
   }
 
-  return initialPlayers.map((player) => {
-    if (player.id === currentPlayerId) {
-      return {
-        ...player,
-        confirmation: savedConfirmation,
-      }
-    }
+  return 'pending'
+}
 
-    return player
-  })
+type GroupRosterRow = {
+  role: 'admin' | 'member'
+  players: {
+    id: string
+    name: string
+    nickname: string | null
+  } | null
 }
 
 function App() {
-  const [players, setPlayers] = useState(getInitialPlayers)
+  const [players, setPlayers] =
+  useState<Player[]>([])
 
   const [
   authenticatedGroupMemberships,
   setAuthenticatedGroupMemberships,
 ] = useState<AuthenticatedGroupMembership[]>([])
 
+const [
+  authenticatedPlayer,
+  setAuthenticatedPlayer,
+] = useState<AuthenticatedPlayer | null>(null)
+
 const [authStatus, setAuthStatus] =
   useState<
     'loading' | 'authenticated' | 'anonymous'
   >('loading')
 
-  const [roundAssignments, setRoundAssignments] =
-  useState(initialRoundAssignments)
+const [
+  roundAssignments,
+  setRoundAssignments,
+] = useState<RoundPlayerAssignment[]>([])
 
   const [roundResult, setRoundResult] =
   useState<RoundResult | null>(null)
+
+const activeGroup =
+    authenticatedGroupMemberships.find(
+      (membership) =>
+        membership.active &&
+        membership.groups,
+    )?.groups ?? null
+
+  const currentPlayer = players.find(
+    (player) =>
+      player.id === authenticatedPlayer?.id,
+  )
 
 const referenceDate = new Date()
 
@@ -119,24 +150,28 @@ if (confirmationWindow.status === 'closed') {
   confirmationDeadlineText =
     'O prazo de confirmação encerrou na segunda-feira, às 16h.'
 }
- 
-  const currentPlayer = players.find(
-    (player) => player.id === currentPlayerId,
-  )
 
   const currentPlayerConfirmation =
   currentPlayer?.confirmation
 
   useEffect(() => {
-    if (!currentPlayerConfirmation) {
-      return
-    }
+  if (
+    !currentPlayer ||
+    !currentPlayerConfirmation
+  ) {
+    return
+  }
 
-    localStorage.setItem(
-      confirmationStorageKey,
-      currentPlayerConfirmation,
-    )
-  }, [currentPlayerConfirmation])
+  localStorage.setItem(
+    getConfirmationStorageKey(
+      currentPlayer.id,
+    ),
+    currentPlayerConfirmation,
+  )
+}, [
+  currentPlayer?.id,
+  currentPlayerConfirmation,
+])
 
   useEffect(() => {
   async function restoreAuthenticatedGroup() {
@@ -157,13 +192,15 @@ setAuthStatus('authenticated')
       error: playerError,
     } = await supabase
       .from('players')
-      .select('id')
+      .select('id, name, nickname')
       .eq('auth_user_id', user.id)
       .maybeSingle()
 
     if (playerError || !player) {
       return
     }
+
+    setAuthenticatedPlayer(player)
 
     const {
       data: memberships,
@@ -201,6 +238,74 @@ setAuthStatus('authenticated')
 }, [])
 
 useEffect(() => {
+  async function loadGroupPlayers() {
+    if (!activeGroup || !authenticatedPlayer) {
+      setPlayers([])
+      setRoundAssignments([])
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('group_members')
+      .select(`
+        role,
+        players (
+          id,
+          name,
+          nickname
+        )
+      `)
+      .eq('group_id', activeGroup.id)
+      .eq('active', true)
+      .overrideTypes<
+        GroupRosterRow[],
+        { merge: false }
+      >()
+
+    if (error) {
+      console.error(
+        'Erro ao carregar jogadores:',
+        error,
+      )
+      return
+    }
+
+    const loadedPlayers: Player[] =
+      data.flatMap((membership) => {
+        const player = membership.players
+
+        if (!player) {
+          return []
+        }
+
+        return [
+          {
+            id: player.id,
+            name:
+              player.nickname ??
+              player.name,
+            role: membership.role,
+            confirmation:
+              player.id === authenticatedPlayer.id
+                ? getSavedConfirmation(player.id)
+                : 'pending',
+          },
+        ]
+      })
+
+    setPlayers(loadedPlayers)
+
+    setRoundAssignments(
+      createInitialRoundAssignments(
+        loadedPlayers,
+      ),
+    )
+  }
+
+  void loadGroupPlayers()
+}, [activeGroup?.id, authenticatedPlayer?.id])
+
+useEffect(() => {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange(
@@ -210,8 +315,11 @@ useEffect(() => {
       }
 
       if (event === 'SIGNED_OUT') {
-        setAuthStatus('anonymous')
+        setAuthenticatedPlayer(null)
         setAuthenticatedGroupMemberships([])
+        setPlayers([])
+        setRoundAssignments([])
+        setAuthStatus('anonymous')
       }
     },
   )
@@ -234,15 +342,23 @@ useEffect(() => {
   ).length
 
   function handleConfirmation(
-  newConfirmation: Exclude<ConfirmationStatus, 'pending'>,
+  newConfirmation: Exclude<
+    ConfirmationStatus,
+    'pending'
+  >,
 ) {
-  if (!isConfirmationOpen) {
+  if (
+    !isConfirmationOpen ||
+    !authenticatedPlayer
+  ) {
     return
   }
 
   setPlayers((currentPlayers) =>
     currentPlayers.map((player) => {
-      if (player.id === currentPlayerId) {
+      if (
+        player.id === authenticatedPlayer.id
+      ) {
         return {
           ...player,
           confirmation: newConfirmation,
@@ -255,21 +371,25 @@ useEffect(() => {
 }
 
 function handleAuthenticated(
-    _player: AuthenticatedPlayer,
-    memberships: AuthenticatedGroupMembership[],
-  ) {
-    setAuthenticatedGroupMemberships(memberships)
-    setAuthStatus('authenticated')
-  }
+  player: AuthenticatedPlayer,
+  memberships: AuthenticatedGroupMembership[],
+) {
+  setAuthenticatedPlayer(player)
+  setAuthenticatedGroupMemberships(memberships)
+  setAuthStatus('authenticated')
+}
 
 function handleSignedOut() {
+  setAuthenticatedPlayer(null)
   setAuthenticatedGroupMemberships([])
+  setPlayers([])
+  setRoundAssignments([])
   setAuthStatus('anonymous')
 }
 
 function handleSwapPlayers(
-  firstPlayerId: number,
-  secondPlayerId: number,
+  firstPlayerId: string,
+  secondPlayerId: string,
 ) {
   if (currentPlayer?.role !== 'admin') {
     return
@@ -325,13 +445,6 @@ function handleSaveRoundResult(
     blackScore,
   })
 }
-
-const activeGroup =
-  authenticatedGroupMemberships.find(
-    (membership) =>
-      membership.active &&
-      membership.groups,
-  )?.groups ?? null
 
 if (authStatus === 'loading') {
   return (
@@ -425,10 +538,10 @@ return (
         path="/grupo"
         element= {  authStatus === 'authenticated' ? (
         <GroupPage
-          groupId={activeGroup?.id ?? null}
           groupName={
             activeGroup?.name ?? '10 e Faixa'
           }
+          players={players}
         />
         ) : (
           <Navigate
