@@ -10,8 +10,8 @@ type TeamLineupCardProps = {
   players: Player[]
   assignments: RoundPlayerAssignment[]
   isEditing: boolean
-  selectedPlayerId: number | null
-  onSelectPlayer: (playerId: number) => void
+  selectedPlayerId: string | null
+  onSelectPlayer: (playerId: string) => void
 }
 
 function getTeamName(team: TeamColor) {
