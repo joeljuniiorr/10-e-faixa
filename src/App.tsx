@@ -2,6 +2,7 @@ import {
   createInitialRoundAssignments,
   type RoundPlayerAssignment,
   type RoundResult,
+  type Round,
 } from './data/round'
 import { useEffect, useState } from 'react'
 import { Route, Routes, Navigate } from 'react-router'
@@ -97,6 +98,9 @@ const [
   const [roundResult, setRoundResult] =
   useState<RoundResult | null>(null)
 
+  const [activeRound, setActiveRound] =
+  useState<Round | null>(null)
+
 const activeGroup =
     authenticatedGroupMemberships.find(
       (membership) =>
@@ -111,18 +115,20 @@ const activeGroup =
 
 const referenceDate = new Date()
 
-const nextRoundDate = getNextRoundDate(referenceDate)
+const roundDate = activeRound
+  ? new Date(activeRound.scheduledAt)
+  : getNextRoundDate(referenceDate)
 
 const formattedRoundDate =
-  formatRoundDate(nextRoundDate)
+  formatRoundDate(roundDate)
 
 const confirmationWindow = getConfirmationWindow(
-  nextRoundDate,
+  roundDate,
   referenceDate,
 )
 
 const resultsWindow = getResultsWindow(
-  nextRoundDate,
+  roundDate,
   referenceDate,
 )
 
@@ -306,6 +312,71 @@ useEffect(() => {
 }, [activeGroup?.id, authenticatedPlayer?.id])
 
 useEffect(() => {
+  async function loadActiveRound() {
+    if (!activeGroup) {
+      setActiveRound(null)
+      return
+    }
+
+    const now = new Date().toISOString()
+
+    const { data, error } = await supabase
+      .from('rounds')
+      .select(`
+        id,
+        group_id,
+        scheduled_at,
+        ends_at,
+        confirmation_opens_at,
+        confirmation_closes_at,
+        results_open_at,
+        evaluation_closes_at,
+        status
+      `)
+      .eq('group_id', activeGroup.id)
+      .gte('evaluation_closes_at', now)
+      .neq('status', 'cancelled')
+      .order('scheduled_at', {
+        ascending: true,
+      })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) {
+      console.error(
+        'Erro ao carregar rodada:',
+        error,
+      )
+
+      setActiveRound(null)
+      return
+    }
+
+    if (!data) {
+      setActiveRound(null)
+      return
+    }
+
+    setActiveRound({
+      id: data.id,
+      groupId: data.group_id,
+      scheduledAt: data.scheduled_at,
+      endsAt: data.ends_at,
+      confirmationOpensAt:
+        data.confirmation_opens_at,
+      confirmationClosesAt:
+        data.confirmation_closes_at,
+      resultsOpenAt: data.results_open_at,
+      evaluationClosesAt:
+        data.evaluation_closes_at,
+      status: data.status,
+    })
+  }
+
+  loadActiveRound()
+}, [activeGroup?.id])
+
+useEffect(() => {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange(
@@ -315,6 +386,7 @@ useEffect(() => {
       }
 
       if (event === 'SIGNED_OUT') {
+        setActiveRound(null)
         setAuthenticatedPlayer(null)
         setAuthenticatedGroupMemberships([])
         setPlayers([])
@@ -385,6 +457,7 @@ function handleSignedOut() {
   setPlayers([])
   setRoundAssignments([])
   setAuthStatus('anonymous')
+  setActiveRound(null)
 }
 
 function handleSwapPlayers(
@@ -543,7 +616,7 @@ return (
           }
           players={players}
         />
-        ) : (
+        ) : ( 
           <Navigate
             to="/entrar"
             replace

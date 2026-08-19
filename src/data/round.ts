@@ -71,3 +71,20 @@ export type RoundResult = {
   blueScore: number
   blackScore: number
 }
+
+export type RoundStatus =
+  | 'scheduled'
+  | 'finalized'
+  | 'cancelled'
+
+export type Round = {
+  id: string
+  groupId: string
+  scheduledAt: string
+  endsAt: string
+  confirmationOpensAt: string
+  confirmationClosesAt: string
+  resultsOpenAt: string
+  evaluationClosesAt: string
+  status: RoundStatus
+}
