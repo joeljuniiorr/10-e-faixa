@@ -424,7 +424,12 @@ return (
       <Route
         path="/grupo"
         element= {  authStatus === 'authenticated' ? (
-        <GroupPage players={players} />
+        <GroupPage
+          groupId={activeGroup?.id ?? null}
+          groupName={
+            activeGroup?.name ?? '10 e Faixa'
+          }
+        />
         ) : (
           <Navigate
             to="/entrar"
