@@ -9,6 +9,12 @@ type RoundEvaluationRow = {
   rating: number
 }
 
+type RoundEvaluationSummaryRow = {
+  evaluated_player_id: string
+  average_rating: number | null
+  ratings_count: number
+}
+
 type EvaluationFeedback = {
   kind: 'success' | 'error'
   message: string
@@ -20,7 +26,13 @@ type EvaluationPageProps = {
   players: Player[]
   assignments: RoundPlayerAssignment[]
   isEvaluationOpen: boolean
+  isEvaluationClosed: boolean
+  isAdmin: boolean
   evaluationStatusText: string
+  onEvaluationClosed: (
+    roundId: string,
+    closedAt: string,
+  ) => void
 }
 
 const ratingOptions = Array.from(
@@ -36,13 +48,23 @@ function formatRating(rating: number) {
   return rating.toFixed(1).replace('.', ',')
 }
 
+function formatAverageRating(rating: number) {
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(rating)
+}
+
 export function EvaluationPage({
   roundId,
   currentPlayerId,
   players,
   assignments,
   isEvaluationOpen,
+  isEvaluationClosed,
+  isAdmin,
   evaluationStatusText,
+  onEvaluationClosed,
 }: EvaluationPageProps) {
   const [ratings, setRatings] = useState<
     Record<string, number>
@@ -53,6 +75,18 @@ export function EvaluationPage({
 
   const [isSaving, setIsSaving] =
     useState(false)
+
+  const [isClosing, setIsClosing] =
+    useState(false)
+
+  const [evaluationSummary, setEvaluationSummary] =
+    useState<RoundEvaluationSummaryRow[]>([])
+
+  const [isLoadingSummary, setIsLoadingSummary] =
+    useState(false)
+
+  const [summaryError, setSummaryError] =
+    useState<string | null>(null)
 
   const [feedback, setFeedback] =
     useState<EvaluationFeedback | null>(null)
@@ -68,10 +102,19 @@ export function EvaluationPage({
       participantIds.has(currentPlayerId),
   )
 
-  const evaluablePlayers = players.filter(
-    (player) =>
-      participantIds.has(player.id) &&
-      player.id !== currentPlayerId,
+  const participantPlayers = players.filter((player) =>
+    participantIds.has(player.id),
+  )
+
+  const evaluablePlayers = participantPlayers.filter(
+    (player) => player.id !== currentPlayerId,
+  )
+
+  const summaryByPlayerId = new Map(
+    evaluationSummary.map((summary) => [
+      summary.evaluated_player_id,
+      summary,
+    ]),
   )
 
   const selectedRatingsCount =
@@ -138,6 +181,67 @@ export function EvaluationPage({
       ignoreResult = true
     }
   }, [currentPlayerId, roundId])
+
+  useEffect(() => {
+    let ignoreResult = false
+
+    async function loadEvaluationSummary() {
+      setEvaluationSummary([])
+      setSummaryError(null)
+
+      if (!roundId || !isEvaluationClosed) {
+        setIsLoadingSummary(false)
+        return
+      }
+
+      setIsLoadingSummary(true)
+
+      const { data, error } = await supabase
+        .rpc('get_round_evaluation_summary', {
+          target_round_id: roundId,
+        })
+
+      if (ignoreResult) {
+        return
+      }
+
+      setIsLoadingSummary(false)
+
+      if (error) {
+        console.error(
+          'Erro ao carregar médias das avaliações:',
+          error,
+        )
+        setSummaryError(
+          'Não foi possível carregar o resultado das avaliações.',
+        )
+        return
+      }
+
+      if (!Array.isArray(data)) {
+        console.error(
+          'Erro ao carregar médias das avaliações:',
+          new Error(
+            'A função não retornou uma lista de médias.',
+          ),
+        )
+        setSummaryError(
+          'Não foi possível carregar o resultado das avaliações.',
+        )
+        return
+      }
+
+      setEvaluationSummary(
+        data as RoundEvaluationSummaryRow[],
+      )
+    }
+
+    void loadEvaluationSummary()
+
+    return () => {
+      ignoreResult = true
+    }
+  }, [isEvaluationClosed, roundId])
 
   function handleRatingChange(
     playerId: string,
@@ -220,6 +324,57 @@ export function EvaluationPage({
     })
   }
 
+  async function handleCloseEvaluation() {
+    if (
+      !isEvaluationOpen ||
+      !isAdmin ||
+      !roundId ||
+      isClosing
+    ) {
+      return
+    }
+
+    const confirmed = window.confirm(
+      'Encerrar as avaliações agora? Esta ação não poderá ser desfeita.',
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setIsClosing(true)
+    setFeedback(null)
+
+    const { data, error } = await supabase
+      .rpc('close_round_evaluation', {
+        target_round_id: roundId,
+      })
+
+    setIsClosing(false)
+
+    if (error || typeof data !== 'string') {
+      console.error(
+        'Erro ao encerrar avaliações da rodada:',
+        error ??
+          new Error(
+            'A função não retornou o horário de fechamento.',
+          ),
+      )
+      setFeedback({
+        kind: 'error',
+        message:
+          'Não foi possível encerrar as avaliações. Tente novamente.',
+      })
+      return
+    }
+
+    onEvaluationClosed(roundId, data)
+    setFeedback({
+      kind: 'success',
+      message: 'Avaliações encerradas com sucesso.',
+    })
+  }
+
   return (
     <section className="evaluation-page">
       <Link className="back-link" to="/jogos">
@@ -249,6 +404,33 @@ export function EvaluationPage({
         </strong>
         <p>{evaluationStatusText}</p>
       </section>
+
+      {isEvaluationOpen && isAdmin && roundId && (
+        <section className="evaluation-admin-card">
+          <div>
+            <p className="eyebrow">Administração</p>
+            <h2>Encerramento antecipado</h2>
+            <p>
+              Encerre a coleta e libere as médias
+              agregadas. Esta ação não poderá ser
+              desfeita.
+            </p>
+          </div>
+
+          <button
+            className="evaluation-close-button"
+            type="button"
+            disabled={isClosing}
+            onClick={() => {
+              void handleCloseEvaluation()
+            }}
+          >
+            {isClosing
+              ? 'Encerrando...'
+              : 'Encerrar avaliações'}
+          </button>
+        </section>
+      )}
 
       {!roundId && (
         <section className="evaluation-empty-state">
@@ -367,17 +549,103 @@ export function EvaluationPage({
               </button>
             )}
 
-            {feedback && (
-              <p
-                className={`evaluation-feedback evaluation-feedback--${feedback.kind}`}
-                role="status"
-                aria-live="polite"
-              >
-                {feedback.message}
-              </p>
-            )}
           </>
         )}
+
+      {feedback && (
+        <p
+          className={`evaluation-feedback evaluation-feedback--${feedback.kind}`}
+          role="status"
+          aria-live="polite"
+        >
+          {feedback.message}
+        </p>
+      )}
+
+      {roundId && isEvaluationClosed && (
+        <section className="evaluation-summary-section">
+          <div className="evaluation-summary-heading">
+            <p className="eyebrow">Médias agregadas</p>
+            <h2>Resultado das avaliações</h2>
+            <p>
+              Os votos individuais permanecem privados.
+            </p>
+          </div>
+
+          {isLoadingSummary && (
+            <p className="evaluation-summary-message">
+              Carregando resultado das avaliações...
+            </p>
+          )}
+
+          {summaryError && (
+            <p
+              className="evaluation-feedback evaluation-feedback--error"
+              role="status"
+            >
+              {summaryError}
+            </p>
+          )}
+
+          {!isLoadingSummary && !summaryError && (
+            <div className="evaluation-summary-list">
+              {participantPlayers.map((player) => {
+                const summary =
+                  summaryByPlayerId.get(player.id)
+
+                return (
+                  <article
+                    className="evaluation-summary-player"
+                    key={player.id}
+                  >
+                    <div className="evaluation-summary-player__identity">
+                      <span className="player-avatar">
+                        {player.name.charAt(0)}
+                      </span>
+                      <strong>{player.name}</strong>
+                    </div>
+
+                    {!summary && (
+                      <p>Nenhuma avaliação recebida</p>
+                    )}
+
+                    {summary &&
+                      summary.average_rating === null && (
+                        <div className="evaluation-summary-player__result">
+                          <strong>Média indisponível</strong>
+                          <span>
+                            Amostra insuficiente ·{' '}
+                            {summary.ratings_count}{' '}
+                            {summary.ratings_count === 1
+                              ? 'avaliação'
+                              : 'avaliações'}
+                          </span>
+                        </div>
+                      )}
+
+                    {summary &&
+                      summary.average_rating !== null && (
+                        <div className="evaluation-summary-player__result">
+                          <strong>
+                            {formatAverageRating(
+                              summary.average_rating,
+                            )}
+                          </strong>
+                          <span>
+                            {summary.ratings_count}{' '}
+                            {summary.ratings_count === 1
+                              ? 'avaliação'
+                              : 'avaliações'}
+                          </span>
+                        </div>
+                      )}
+                  </article>
+                )
+              })}
+            </div>
+          )}
+        </section>
+      )}
     </section>
   )
 }

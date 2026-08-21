@@ -155,6 +155,10 @@ Tanto o avaliador quanto o jogador avaliado precisam participar da rodada por me
 
 As notas variam de 0 a 10 em incrementos de 0,5 e podem ser atualizadas enquanto a janela de avaliação estiver aberta.
 
+Os votos individuais permanecem privados. Depois do encerramento, as médias são disponibilizadas por uma agregação segura, sem expor avaliadores ou notas individuais. A média de um jogador só é apresentada quando ele possui pelo menos três avaliações; abaixo desse limite, apenas a insuficiência da amostra é informada.
+
+O encerramento ocorre no prazo definido por `evaluation_closes_at` ou pode ser antecipado por um administrador, registrando o momento em `evaluation_closed_at`. Não há reabertura nessa primeira versão.
+
 ## Entidades planejadas para versões futuras
 
 ### round_player_stats

@@ -1018,8 +1018,10 @@
 
 .evaluation-cta-card,
 .evaluation-status-card,
+.evaluation-admin-card,
 .evaluation-empty-state,
-.evaluation-player-card {
+.evaluation-player-card,
+.evaluation-summary-section {
   border: 1px solid #e3e8e4;
   border-radius: 20px;
   background: #ffffff;
@@ -1194,4 +1196,111 @@
 .evaluation-feedback--error {
   background: #f5eeee;
   color: #a33d3d;
+}
+
+.evaluation-admin-card {
+  display: grid;
+  gap: 18px;
+  margin-top: 16px;
+  padding: 18px;
+}
+
+.evaluation-admin-card h2 {
+  margin: 7px 0 0;
+  font-size: 1.125rem;
+}
+
+.evaluation-admin-card div > p:last-child {
+  margin: 10px 0 0;
+  color: #647067;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.evaluation-close-button {
+  min-height: 48px;
+  border: 1px solid #b44747;
+  border-radius: 13px;
+  background: #ffffff;
+  color: #a33d3d;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.evaluation-close-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.evaluation-summary-section {
+  margin-top: 24px;
+  padding: 20px;
+}
+
+.evaluation-summary-heading h2 {
+  margin: 7px 0 0;
+  font-size: 1.25rem;
+}
+
+.evaluation-summary-heading > p:last-child,
+.evaluation-summary-message {
+  color: #647067;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.evaluation-summary-heading > p:last-child {
+  margin: 10px 0 0;
+}
+
+.evaluation-summary-message {
+  margin: 20px 0 0;
+}
+
+.evaluation-summary-list {
+  display: grid;
+  gap: 0;
+  margin-top: 18px;
+}
+
+.evaluation-summary-player {
+  display: grid;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid #edf0ed;
+}
+
+.evaluation-summary-player__identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.evaluation-summary-player__identity strong {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evaluation-summary-player > p {
+  margin: 0;
+  color: #647067;
+  font-size: 0.8125rem;
+}
+
+.evaluation-summary-player__result {
+  display: grid;
+  gap: 3px;
+}
+
+.evaluation-summary-player__result strong {
+  color: #1d753d;
+  font-size: 1rem;
+}
+
+.evaluation-summary-player__result span {
+  color: #647067;
+  font-size: 0.75rem;
 }

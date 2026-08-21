@@ -129,14 +129,19 @@ const isResultsOpen = Boolean(
       new Date(activeRound.resultsOpenAt),
 )
 
+const isEvaluationClosed = Boolean(
+  activeRound &&
+    (activeRound.evaluationClosedAt !== null ||
+      referenceDate >=
+        new Date(activeRound.evaluationClosesAt)),
+)
+
 const isEvaluationOpen = Boolean(
   activeRound &&
     activeRound.status === 'scheduled' &&
     referenceDate >=
       new Date(activeRound.resultsOpenAt) &&
-    referenceDate <=
-      new Date(activeRound.evaluationClosesAt) &&
-    activeRound.evaluationClosedAt === null,
+    !isEvaluationClosed,
 )
 
 let evaluationStatusText =
@@ -145,7 +150,7 @@ let evaluationStatusText =
 if (
   activeRound &&
   activeRound.status === 'scheduled' &&
-  activeRound.evaluationClosedAt === null &&
+  !isEvaluationClosed &&
   referenceDate < new Date(activeRound.resultsOpenAt)
 ) {
   evaluationStatusText =
@@ -160,7 +165,7 @@ if (isEvaluationOpen) {
 if (activeRound && !isEvaluationOpen) {
   const evaluationHasNotStarted =
     activeRound.status === 'scheduled' &&
-    activeRound.evaluationClosedAt === null &&
+    !isEvaluationClosed &&
     referenceDate < new Date(activeRound.resultsOpenAt)
 
   if (!evaluationHasNotStarted) {
@@ -655,6 +660,25 @@ function handleSignedOut() {
   setActiveRound(null)
 }
 
+function handleEvaluationClosed(
+  roundId: string,
+  closedAt: string,
+) {
+  setActiveRound((currentRound) => {
+    if (
+      !currentRound ||
+      currentRound.id !== roundId
+    ) {
+      return currentRound
+    }
+
+    return {
+      ...currentRound,
+      evaluationClosedAt: closedAt,
+    }
+  })
+}
+
 async function handleSwapPlayers(
   firstPlayerId: string,
   secondPlayerId: string,
@@ -885,8 +909,13 @@ return (
               players={players}
               assignments={roundAssignments}
               isEvaluationOpen={isEvaluationOpen}
+              isEvaluationClosed={isEvaluationClosed}
+              isAdmin={currentPlayer?.role === 'admin'}
               evaluationStatusText={
                 evaluationStatusText
+              }
+              onEvaluationClosed={
+                handleEvaluationClosed
               }
             />
           ) : (
