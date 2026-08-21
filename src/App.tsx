@@ -28,40 +28,6 @@ import type {
   AuthenticatedGroupMembership,
   AuthenticatedPlayer,
 } from './types/auth'
-
-
-const currentPlayerId = 1
-
-const confirmationStorageKey =
-  '10-e-faixa:futebol-da-raca:joel-confirmation'
-
-const confirmationStorageKeyPrefix =
-  '10-e-faixa:confirmation'
-
-function getConfirmationStorageKey(
-  playerId: string,
-) {
-  return `${confirmationStorageKeyPrefix}:${playerId}`
-}
-
-function getSavedConfirmation(
-  playerId: string,
-): ConfirmationStatus {
-  const savedConfirmation = localStorage.getItem(
-    getConfirmationStorageKey(playerId),
-  )
-
-  if (
-    savedConfirmation === 'inside' ||
-    savedConfirmation === 'outside' ||
-    savedConfirmation === 'pending'
-  ) {
-    return savedConfirmation
-  }
-
-  return 'pending'
-}
-
 type GroupRosterRow = {
   role: 'admin' | 'member'
   players: {
@@ -69,6 +35,11 @@ type GroupRosterRow = {
     name: string
     nickname: string | null
   } | null
+}
+
+type RoundConfirmationRow = {
+  player_id: string
+  status: 'inside' | 'outside'
 }
 
 function App() {
@@ -100,6 +71,8 @@ const [
 
   const [activeRound, setActiveRound] =
   useState<Round | null>(null)
+
+const activeRoundId = activeRound?.id
 
 const activeGroup =
     authenticatedGroupMemberships.find(
@@ -159,25 +132,6 @@ if (confirmationWindow.status === 'closed') {
 
   const currentPlayerConfirmation =
   currentPlayer?.confirmation
-
-  useEffect(() => {
-  if (
-    !currentPlayer ||
-    !currentPlayerConfirmation
-  ) {
-    return
-  }
-
-  localStorage.setItem(
-    getConfirmationStorageKey(
-      currentPlayer.id,
-    ),
-    currentPlayerConfirmation,
-  )
-}, [
-  currentPlayer?.id,
-  currentPlayerConfirmation,
-])
 
   useEffect(() => {
   async function restoreAuthenticatedGroup() {
@@ -291,10 +245,7 @@ useEffect(() => {
               player.nickname ??
               player.name,
             role: membership.role,
-            confirmation:
-              player.id === authenticatedPlayer.id
-                ? getSavedConfirmation(player.id)
-                : 'pending',
+            confirmation: 'pending',
           },
         ]
       })
@@ -377,6 +328,49 @@ useEffect(() => {
 }, [activeGroup?.id])
 
 useEffect(() => {
+  async function loadRoundConfirmations() {
+    if (!activeRoundId || players.length === 0) {
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('round_confirmations')
+      .select('player_id, status')
+      .eq('round_id', activeRoundId)
+      .overrideTypes<
+        RoundConfirmationRow[],
+        { merge: false }
+      >()
+
+    if (error) {
+      console.error(
+        'Erro ao carregar confirmações da rodada:',
+        error,
+      )
+      return
+    }
+
+    const confirmationsByPlayerId = new Map(
+      data.map((confirmation) => [
+        confirmation.player_id,
+        confirmation.status,
+      ]),
+    )
+
+    setPlayers((currentPlayers) =>
+      currentPlayers.map((player) => ({
+        ...player,
+        confirmation:
+          confirmationsByPlayerId.get(player.id) ??
+          'pending',
+      })),
+    )
+  }
+
+  void loadRoundConfirmations()
+}, [activeRoundId, players.length])
+
+useEffect(() => {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange(
@@ -413,7 +407,7 @@ useEffect(() => {
     (player) => player.confirmation === 'pending',
   ).length
 
-  function handleConfirmation(
+  async function handleConfirmation(
   newConfirmation: Exclude<
     ConfirmationStatus,
     'pending'
@@ -421,8 +415,31 @@ useEffect(() => {
 ) {
   if (
     !isConfirmationOpen ||
-    !authenticatedPlayer
+    !authenticatedPlayer ||
+    !activeRound
   ) {
+    return
+  }
+
+  const { error } = await supabase
+    .from('round_confirmations')
+    .upsert(
+      {
+        round_id: activeRound.id,
+        player_id: authenticatedPlayer.id,
+        status: newConfirmation,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'round_id,player_id',
+      },
+    )
+
+  if (error) {
+    console.error(
+      'Erro ao salvar confirmação da rodada:',
+      error,
+    )
     return
   }
 
@@ -551,7 +568,7 @@ return (
           }
             formattedRoundDate={formattedRoundDate}
             currentConfirmation={
-              currentPlayer?.confirmation
+              currentPlayerConfirmation
             }
             isConfirmationOpen={isConfirmationOpen}
             confirmationStatusText={
