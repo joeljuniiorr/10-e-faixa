@@ -12,6 +12,7 @@ import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
 import { PlayerPage } from './pages/PlayerPage'
 import { GamesPage } from './pages/GamesPage'
+import { EvaluationPage } from './pages/EvaluationPage'
 import { supabase } from './lib/supabase'
 import type {
   ConfirmationStatus,
@@ -127,6 +128,46 @@ const isResultsOpen = Boolean(
     referenceDate >=
       new Date(activeRound.resultsOpenAt),
 )
+
+const isEvaluationOpen = Boolean(
+  activeRound &&
+    activeRound.status === 'scheduled' &&
+    referenceDate >=
+      new Date(activeRound.resultsOpenAt) &&
+    referenceDate <=
+      new Date(activeRound.evaluationClosesAt) &&
+    activeRound.evaluationClosedAt === null,
+)
+
+let evaluationStatusText =
+  'Não há uma rodada ativa para avaliação.'
+
+if (
+  activeRound &&
+  activeRound.status === 'scheduled' &&
+  activeRound.evaluationClosedAt === null &&
+  referenceDate < new Date(activeRound.resultsOpenAt)
+) {
+  evaluationStatusText =
+    'As avaliações estarão disponíveis após o jogo.'
+}
+
+if (isEvaluationOpen) {
+  evaluationStatusText =
+    'Avalie os demais participantes antes do encerramento da janela.'
+}
+
+if (activeRound && !isEvaluationOpen) {
+  const evaluationHasNotStarted =
+    activeRound.status === 'scheduled' &&
+    activeRound.evaluationClosedAt === null &&
+    referenceDate < new Date(activeRound.resultsOpenAt)
+
+  if (!evaluationHasNotStarted) {
+    evaluationStatusText =
+      'A janela de avaliação está encerrada.'
+  }
+}
 
 let confirmationStatusText = 'Confirmações abertas'
 
@@ -301,6 +342,7 @@ useEffect(() => {
         confirmation_closes_at,
         results_open_at,
         evaluation_closes_at,
+        evaluation_closed_at,
         status
       `)
       .eq('group_id', activeGroup.id)
@@ -345,6 +387,8 @@ useEffect(() => {
       resultsOpenAt: data.results_open_at,
       evaluationClosesAt:
         data.evaluation_closes_at,
+      evaluationClosedAt:
+        data.evaluation_closed_at,
       status: data.status,
     })
   }
@@ -809,6 +853,10 @@ return (
           <GamesPage
             formattedRoundDate={formattedRoundDate}
             isResultsOpen={isResultsOpen}
+            isEvaluationOpen={isEvaluationOpen}
+            evaluationStatusText={
+              evaluationStatusText
+            }
             isAdmin={currentPlayer?.role === 'admin'}
             players={players}
             assignments={roundAssignments}
@@ -822,6 +870,28 @@ return (
         replace
         />
         )
+        }
+      />
+
+      <Route
+        path="/avaliacoes"
+        element={
+          authStatus === 'authenticated' ? (
+            <EvaluationPage
+              roundId={activeRoundId ?? null}
+              currentPlayerId={
+                authenticatedPlayer?.id ?? null
+              }
+              players={players}
+              assignments={roundAssignments}
+              isEvaluationOpen={isEvaluationOpen}
+              evaluationStatusText={
+                evaluationStatusText
+              }
+            />
+          ) : (
+            <Navigate to="/entrar" replace />
+          )
         }
       />
 

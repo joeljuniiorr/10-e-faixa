@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { RoundScoreForm } from '../components/RoundScoreForm'
 import { TeamLineupCard } from '../components/TeamLineupCard'
 import type { Player } from '../data/players'
@@ -10,6 +11,8 @@ import type {
 type GamesPageProps = {
   formattedRoundDate: string
   isResultsOpen: boolean
+  isEvaluationOpen: boolean
+  evaluationStatusText: string
   isAdmin: boolean
   players: Player[]
   assignments: RoundPlayerAssignment[]
@@ -29,6 +32,8 @@ type GamesPageProps = {
 export function GamesPage({
   formattedRoundDate,
   isResultsOpen,
+  isEvaluationOpen,
+  evaluationStatusText,
   isAdmin,
   players,
   assignments,
@@ -355,6 +360,25 @@ export function GamesPage({
               )}
             </div>
           )}
+      </section>
+
+      <section className="evaluation-cta-card">
+        <p className="eyebrow">Avaliações</p>
+        <h2>
+          {isEvaluationOpen
+            ? 'Avaliações abertas'
+            : 'Avaliações indisponíveis'}
+        </h2>
+        <p>{evaluationStatusText}</p>
+
+        {isEvaluationOpen && (
+          <Link
+            className="evaluation-cta-link"
+            to="/avaliacoes"
+          >
+            Avaliar jogadores
+          </Link>
+        )}
       </section>
     </section>
   )

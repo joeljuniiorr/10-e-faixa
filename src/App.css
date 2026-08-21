@@ -1015,3 +1015,183 @@
 .authenticated-group-card {
   margin-top: 10px;
 }
+
+.evaluation-cta-card,
+.evaluation-status-card,
+.evaluation-empty-state,
+.evaluation-player-card {
+  border: 1px solid #e3e8e4;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 32px rgb(25 44 31 / 8%);
+}
+
+.evaluation-cta-card {
+  margin-top: 16px;
+  padding: 22px;
+}
+
+.evaluation-cta-card h2 {
+  margin: 8px 0 0;
+  font-size: 1.25rem;
+}
+
+.evaluation-cta-card > p:last-of-type {
+  margin: 12px 0 0;
+  color: #647067;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.evaluation-cta-link {
+  display: grid;
+  min-height: 50px;
+  margin-top: 18px;
+  place-items: center;
+  border-radius: 14px;
+  background: #268c4b;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.evaluation-status-card {
+  margin-top: 20px;
+  padding: 18px;
+}
+
+.evaluation-status-card strong {
+  display: block;
+  font-size: 0.9375rem;
+}
+
+.evaluation-status-card p {
+  margin: 8px 0 0;
+  color: #647067;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.evaluation-status-card--open {
+  border-color: #b9ddc3;
+  background: #ecf8ef;
+}
+
+.evaluation-status-card--open strong {
+  color: #1d753d;
+}
+
+.evaluation-status-card--closed {
+  background: #f8faf8;
+}
+
+.evaluation-empty-state {
+  margin-top: 16px;
+  padding: 22px;
+}
+
+.evaluation-empty-state h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.evaluation-empty-state p {
+  margin: 10px 0 0;
+  color: #647067;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.evaluation-empty-state > p:only-child {
+  margin-top: 0;
+}
+
+.evaluation-list-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 28px 0 14px;
+}
+
+.evaluation-list-heading h2 {
+  margin: 7px 0 0;
+  font-size: 1.25rem;
+}
+
+.evaluation-list-heading > span {
+  color: #647067;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.evaluation-list {
+  display: grid;
+  gap: 12px;
+}
+
+.evaluation-player-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.evaluation-player-card label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.evaluation-player-card label strong {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evaluation-player-card select {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border: 1px solid #dce2dd;
+  border-radius: 12px;
+  background: #f8faf8;
+  color: #18201b;
+  font: inherit;
+  font-weight: 700;
+}
+
+.evaluation-player-card select:focus {
+  border-color: #268c4b;
+  outline: 3px solid rgb(38 140 75 / 12%);
+}
+
+.evaluation-player-card select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.evaluation-save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.evaluation-feedback {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.evaluation-feedback--success {
+  background: #ecf8ef;
+  color: #1d753d;
+}
+
+.evaluation-feedback--error {
+  background: #f5eeee;
+  color: #a33d3d;
+}

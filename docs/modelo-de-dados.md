@@ -48,6 +48,7 @@ Principais informações:
 - `confirmation_closes_at`: encerramento das confirmações
 - `results_open_at`: liberação do registro de resultados e início das avaliações
 - `evaluation_closes_at`: prazo padrão para encerramento das avaliações
+- `evaluation_closed_at`: encerramento antecipado opcional das avaliações; permanece nulo enquanto não houver fechamento manual
 - `status`: estado administrativo da rodada
 
 Os estados administrativos iniciais são:
@@ -135,10 +136,26 @@ Da mesma forma, vitória, derrota ou empate de cada jogador devem ser derivados 
 
 A ausência de um registro em `round_results` representa uma rodada cujo placar ainda não foi registrado.
 
+### round_evaluations
+
+Armazena as avaliações feitas entre os participantes de uma rodada.
+
+Principais informações:
+
+- `round_id`: rodada relacionada
+- `evaluator_id`: jogador participante que atribuiu a nota
+- `evaluated_player_id`: jogador participante que recebeu a nota
+- `rating`: nota atribuída
+- `created_at`: momento de criação da avaliação
+- `updated_at`: momento da última atualização
+
+A combinação de `round_id`, `evaluator_id` e `evaluated_player_id` forma a chave primária composta. Assim, cada avaliador possui no máximo uma avaliação para cada outro jogador na mesma rodada.
+
+Tanto o avaliador quanto o jogador avaliado precisam participar da rodada por meio de registros em `round_assignments`. O avaliador não pode avaliar a si próprio.
+
+As notas variam de 0 a 10 em incrementos de 0,5 e podem ser atualizadas enquanto a janela de avaliação estiver aberta.
+
 ## Entidades planejadas para versões futuras
 
 ### round_player_stats
 Gols, assistências e defesas por jogador e rodada.
-
-### evaluations
-Avaliações entre jogadores após cada rodada.

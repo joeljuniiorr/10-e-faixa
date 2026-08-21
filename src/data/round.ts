@@ -86,5 +86,6 @@ export type Round = {
   confirmationClosesAt: string
   resultsOpenAt: string
   evaluationClosesAt: string
+  evaluationClosedAt: string | null
   status: RoundStatus
 }
