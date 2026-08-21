@@ -136,6 +136,8 @@ Da mesma forma, vitória, derrota ou empate de cada jogador devem ser derivados 
 
 A ausência de um registro em `round_results` representa uma rodada cujo placar ainda não foi registrado.
 
+O histórico do grupo é derivado das rodadas em `rounds` e de seus placares opcionais em `round_results`, sem duplicar esses dados em outra entidade.
+
 ### round_evaluations
 
 Armazena as avaliações feitas entre os participantes de uma rodada.
@@ -156,6 +158,8 @@ Tanto o avaliador quanto o jogador avaliado precisam participar da rodada por me
 As notas variam de 0 a 10 em incrementos de 0,5 e podem ser atualizadas enquanto a janela de avaliação estiver aberta.
 
 Os votos individuais permanecem privados. Depois do encerramento, as médias são disponibilizadas por uma agregação segura, sem expor avaliadores ou notas individuais. A média de um jogador só é apresentada quando ele possui pelo menos três avaliações; abaixo desse limite, apenas a insuficiência da amostra é informada.
+
+O ranking do grupo utiliza somente agregados seguros de `round_evaluations` pertencentes a rodadas com avaliação encerrada. Os votos individuais continuam privados, e o mínimo de três avaliações também se aplica à média pública do ranking.
 
 O encerramento ocorre no prazo definido por `evaluation_closes_at` ou pode ser antecipado por um administrador, registrando o momento em `evaluation_closed_at`. Não há reabertura nessa primeira versão.
 

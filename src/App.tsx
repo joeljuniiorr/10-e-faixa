@@ -13,6 +13,7 @@ import { HomePage } from './pages/HomePage'
 import { PlayerPage } from './pages/PlayerPage'
 import { GamesPage } from './pages/GamesPage'
 import { EvaluationPage } from './pages/EvaluationPage'
+import { HistoryPage } from './pages/HistoryPage'
 import { supabase } from './lib/supabase'
 import type {
   ConfirmationStatus,
@@ -916,6 +917,22 @@ return (
               }
               onEvaluationClosed={
                 handleEvaluationClosed
+              }
+            />
+          ) : (
+            <Navigate to="/entrar" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/historico"
+        element={
+          authStatus === 'authenticated' ? (
+            <HistoryPage
+              groupId={activeGroup?.id ?? null}
+              groupName={
+                activeGroup?.name ?? '10 e Faixa'
               }
             />
           ) : (

@@ -380,6 +380,13 @@ export function GamesPage({
           </Link>
         )}
       </section>
+
+      <Link
+        className="history-cta-link"
+        to="/historico"
+      >
+        Ver histórico e ranking
+      </Link>
     </section>
   )
 }
