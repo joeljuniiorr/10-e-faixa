@@ -335,6 +335,25 @@ useEffect(() => {
       return
     }
 
+    const { error: ensureRoundError } =
+      await supabase.rpc(
+        'ensure_group_active_round',
+        {
+          target_group_id: activeGroup.id,
+        },
+      )
+
+    if (ignoreResult) {
+      return
+    }
+
+    if (ensureRoundError) {
+      console.error(
+        'Erro ao garantir rodada ativa do grupo:',
+        ensureRoundError,
+      )
+    }
+
     const now = new Date().toISOString()
 
     const { data, error } = await supabase

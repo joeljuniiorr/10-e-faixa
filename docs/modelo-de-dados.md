@@ -10,6 +10,17 @@ Representa os jogadores cadastrados na plataforma.
 ### groups
 Representa os grupos/peladas.
 
+Cada grupo armazena sua configuração de agenda semanal:
+
+- `timezone`: fuso horário usado nos cálculos da agenda
+- `weekly_game_day`: dia semanal da partida
+- `weekly_game_time`: horário local de início da partida
+- `duration_minutes`: duração prevista da partida
+- `confirmation_opens_before`: antecedência para abertura das confirmações
+- `confirmation_closes_before`: antecedência para encerramento das confirmações
+- `results_open_after`: intervalo usado para liberar resultados após a partida
+- `evaluation_closes_after`: intervalo usado para encerrar as avaliações
+
 ### group_members
 Relaciona jogadores aos grupos e define seu papel dentro deles.
 
@@ -60,6 +71,8 @@ Os estados administrativos iniciais são:
 Estados dependentes de horário, como confirmação aberta ou resultados liberados, devem ser derivados dos horários da rodada em vez de armazenados separadamente.
 
 A combinação de `group_id` e `scheduled_at` deve ser única, impedindo duas rodadas do mesmo grupo no mesmo horário.
+
+A função `ensure_group_active_round` garante a rodada operacional sob demanda quando um integrante abre o aplicativo ou quando o grupo ativo é recarregado. Ela retorna uma rodada existente ou cria a próxima usando a configuração semanal do grupo. A operação é idempotente, e a unicidade de `group_id` com `scheduled_at` protege contra rodadas duplicadas.
 
 ### round_confirmations
 
