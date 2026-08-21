@@ -19,9 +19,7 @@ import type {
 } from './data/players'
 import {
   formatRoundDate,
-  getConfirmationWindow,
   getNextRoundDate,
-  getResultsWindow,
 } from './utils/roundDate'
 import './App.css'
 import type {
@@ -95,26 +93,33 @@ const roundDate = activeRound
 const formattedRoundDate =
   formatRoundDate(roundDate)
 
-const confirmationWindow = getConfirmationWindow(
-  roundDate,
-  referenceDate,
+const confirmationWindowStatus =
+  !activeRound || activeRound.status !== 'scheduled'
+    ? 'closed'
+    : referenceDate <
+        new Date(activeRound.confirmationOpensAt)
+      ? 'not-started'
+      : referenceDate <=
+          new Date(activeRound.confirmationClosesAt)
+        ? 'open'
+        : 'closed'
+
+const isConfirmationOpen =
+  confirmationWindowStatus === 'open'
+
+const isResultsOpen = Boolean(
+  activeRound &&
+    activeRound.status !== 'cancelled' &&
+    referenceDate >=
+      new Date(activeRound.resultsOpenAt),
 )
-
-const resultsWindow = getResultsWindow(
-  roundDate,
-  referenceDate,
-)
-
-
-
-const isConfirmationOpen = confirmationWindow.isOpen
 
 let confirmationStatusText = 'Confirmações abertas'
 
 let confirmationDeadlineText =
   'Você pode responder ou alterar sua escolha até segunda-feira, às 16h.'
 
-if (confirmationWindow.status === 'not-started') {
+if (confirmationWindowStatus === 'not-started') {
   confirmationStatusText =
     'Confirmações ainda não abertas'
 
@@ -122,7 +127,7 @@ if (confirmationWindow.status === 'not-started') {
     'As confirmações abrem na terça-feira, às 21h.'
 }
 
-if (confirmationWindow.status === 'closed') {
+if (confirmationWindowStatus === 'closed') {
   confirmationStatusText =
     'Confirmações encerradas'
 
@@ -515,7 +520,7 @@ function handleSaveRoundResult(
   blackScore: number,
 ) {
   if (
-    !resultsWindow.isOpen ||
+    !isResultsOpen ||
     currentPlayer?.role !== 'admin'
   ) {
     return
@@ -607,7 +612,7 @@ return (
         element={ authStatus === 'authenticated' ? (
           <GamesPage
             formattedRoundDate={formattedRoundDate}
-            isResultsOpen={resultsWindow.isOpen}
+            isResultsOpen={isResultsOpen}
             isAdmin={currentPlayer?.role === 'admin'}
             players={players}
             assignments={roundAssignments}
