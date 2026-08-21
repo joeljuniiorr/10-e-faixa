@@ -4,7 +4,7 @@ import {
   type RoundResult,
   type Round,
 } from './data/round'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Route, Routes, Navigate } from 'react-router'
 import { BottomNavigation } from './components/BottomNavigation'
 import { GroupPage } from './pages/GroupPage'
@@ -40,6 +40,17 @@ type RoundConfirmationRow = {
   status: 'inside' | 'outside'
 }
 
+type RoundAssignmentRow = {
+  player_id: string
+  team: RoundPlayerAssignment['team']
+  position: RoundPlayerAssignment['position']
+}
+
+type RoundResultRow = {
+  blue_score: number
+  black_score: number
+}
+
 function App() {
   const [players, setPlayers] =
   useState<Player[]>([])
@@ -69,6 +80,9 @@ const [
 
   const [activeRound, setActiveRound] =
   useState<Round | null>(null)
+
+const activeRoundIdRef =
+  useRef<string | undefined>(undefined)
 
 const activeRoundId = activeRound?.id
 
@@ -256,21 +270,21 @@ useEffect(() => {
       })
 
     setPlayers(loadedPlayers)
-
-    setRoundAssignments(
-      createInitialRoundAssignments(
-        loadedPlayers,
-      ),
-    )
   }
 
   void loadGroupPlayers()
 }, [activeGroup?.id, authenticatedPlayer?.id])
 
 useEffect(() => {
+  let ignoreResult = false
+
   async function loadActiveRound() {
+    activeRoundIdRef.current = undefined
+    setActiveRound(null)
+    setRoundAssignments([])
+    setRoundResult(null)
+
     if (!activeGroup) {
-      setActiveRound(null)
       return
     }
 
@@ -298,6 +312,10 @@ useEffect(() => {
       .limit(1)
       .maybeSingle()
 
+    if (ignoreResult) {
+      return
+    }
+
     if (error) {
       console.error(
         'Erro ao carregar rodada:',
@@ -312,6 +330,8 @@ useEffect(() => {
       setActiveRound(null)
       return
     }
+
+    activeRoundIdRef.current = data.id
 
     setActiveRound({
       id: data.id,
@@ -329,7 +349,12 @@ useEffect(() => {
     })
   }
 
-  loadActiveRound()
+  void loadActiveRound()
+
+  return () => {
+    ignoreResult = true
+    activeRoundIdRef.current = undefined
+  }
 }, [activeGroup?.id])
 
 useEffect(() => {
@@ -376,6 +401,106 @@ useEffect(() => {
 }, [activeRoundId, players.length])
 
 useEffect(() => {
+  let ignoreResult = false
+
+  async function loadRoundAssignments() {
+    if (!activeRoundId || players.length === 0) {
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('round_assignments')
+      .select('player_id, team, position')
+      .eq('round_id', activeRoundId)
+      .overrideTypes<
+        RoundAssignmentRow[],
+        { merge: false }
+      >()
+
+    if (ignoreResult) {
+      return
+    }
+
+    if (error) {
+      console.error(
+        'Erro ao carregar formação da rodada:',
+        error,
+      )
+      return
+    }
+
+    if (data.length === 0) {
+      setRoundAssignments(
+        createInitialRoundAssignments(players),
+      )
+      return
+    }
+
+    setRoundAssignments(
+      data.map((assignment) => ({
+        playerId: assignment.player_id,
+        team: assignment.team,
+        position: assignment.position,
+      })),
+    )
+  }
+
+  void loadRoundAssignments()
+
+  return () => {
+    ignoreResult = true
+  }
+}, [activeRoundId, players])
+
+useEffect(() => {
+  let ignoreResult = false
+
+  async function loadRoundResult() {
+    if (!activeRoundId) {
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('round_results')
+      .select('blue_score, black_score')
+      .eq('round_id', activeRoundId)
+      .maybeSingle()
+      .overrideTypes<
+        RoundResultRow | null,
+        { merge: false }
+      >()
+
+    if (ignoreResult) {
+      return
+    }
+
+    if (error) {
+      console.error(
+        'Erro ao carregar resultado da rodada:',
+        error,
+      )
+      return
+    }
+
+    if (!data) {
+      setRoundResult(null)
+      return
+    }
+
+    setRoundResult({
+      blueScore: data.blue_score,
+      blackScore: data.black_score,
+    })
+  }
+
+  void loadRoundResult()
+
+  return () => {
+    ignoreResult = true
+  }
+}, [activeRoundId])
+
+useEffect(() => {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange(
@@ -385,11 +510,13 @@ useEffect(() => {
       }
 
       if (event === 'SIGNED_OUT') {
+        activeRoundIdRef.current = undefined
         setActiveRound(null)
         setAuthenticatedPlayer(null)
         setAuthenticatedGroupMemberships([])
         setPlayers([])
         setRoundAssignments([])
+        setRoundResult(null)
         setAuthStatus('anonymous')
       }
     },
@@ -474,19 +601,24 @@ function handleAuthenticated(
 }
 
 function handleSignedOut() {
+  activeRoundIdRef.current = undefined
   setAuthenticatedPlayer(null)
   setAuthenticatedGroupMemberships([])
   setPlayers([])
   setRoundAssignments([])
+  setRoundResult(null)
   setAuthStatus('anonymous')
   setActiveRound(null)
 }
 
-function handleSwapPlayers(
+async function handleSwapPlayers(
   firstPlayerId: string,
   secondPlayerId: string,
 ) {
-  if (currentPlayer?.role !== 'admin') {
+  if (
+    currentPlayer?.role !== 'admin' ||
+    !activeRound
+  ) {
     return
   }
 
@@ -494,8 +626,10 @@ function handleSwapPlayers(
     return
   }
 
-  setRoundAssignments((currentAssignments) =>
-    currentAssignments.map((assignment) => {
+  const roundId = activeRound.id
+
+  const nextAssignments = roundAssignments.map(
+    (assignment) => {
       if (assignment.playerId === firstPlayerId) {
         return {
           ...assignment,
@@ -511,17 +645,50 @@ function handleSwapPlayers(
       }
 
       return assignment
-    }),
+    },
   )
+
+  const updatedAt = new Date().toISOString()
+
+  const { error } = await supabase
+    .from('round_assignments')
+    .upsert(
+      nextAssignments.map((assignment) => ({
+        round_id: roundId,
+        player_id: assignment.playerId,
+        team: assignment.team,
+        position: assignment.position,
+        updated_at: updatedAt,
+      })),
+      {
+        onConflict: 'round_id,player_id',
+      },
+    )
+
+  if (error) {
+    console.error(
+      'Erro ao salvar formação da rodada:',
+      error,
+    )
+    return
+  }
+
+  if (activeRoundIdRef.current !== roundId) {
+    return
+  }
+
+  setRoundAssignments(nextAssignments)
 }
 
-function handleSaveRoundResult(
+async function handleSaveRoundResult(
   blueScore: number,
   blackScore: number,
 ) {
   if (
     !isResultsOpen ||
-    currentPlayer?.role !== 'admin'
+    currentPlayer?.role !== 'admin' ||
+    !activeRound ||
+    !authenticatedPlayer
   ) {
     return
   }
@@ -532,6 +699,35 @@ function handleSaveRoundResult(
     !Number.isInteger(blueScore) ||
     !Number.isInteger(blackScore)
   ) {
+    return
+  }
+
+  const roundId = activeRound.id
+
+  const { error } = await supabase
+    .from('round_results')
+    .upsert(
+      {
+        round_id: roundId,
+        blue_score: blueScore,
+        black_score: blackScore,
+        updated_by: authenticatedPlayer.id,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'round_id',
+      },
+    )
+
+  if (error) {
+    console.error(
+      'Erro ao salvar resultado da rodada:',
+      error,
+    )
+    return
+  }
+
+  if (activeRoundIdRef.current !== roundId) {
     return
   }
 
