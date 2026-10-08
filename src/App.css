@@ -1319,6 +1319,237 @@
   text-decoration: underline;
 }
 
+.stats-cta-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 54px;
+  margin-top: 16px;
+  padding: 0 18px;
+  border: 1px solid #dce2dd;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #1d753d;
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.stats-cta-link:hover {
+  border-color: #b9ddc3;
+  background: #f8faf8;
+}
+
+.round-stats-status-card,
+.round-stats-empty-state,
+.round-stats-team {
+  border: 1px solid #e3e8e4;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 10px 32px rgb(25 44 31 / 8%);
+}
+
+.round-stats-status-card {
+  margin-top: 20px;
+  padding: 18px;
+  background: #f8faf8;
+}
+
+.round-stats-status-card--open {
+  border-color: #b9ddc3;
+  background: #ecf8ef;
+}
+
+.round-stats-status-card strong {
+  font-size: 0.9375rem;
+}
+
+.round-stats-status-card--open strong {
+  color: #1d753d;
+}
+
+.round-stats-status-card p,
+.round-stats-empty-state p {
+  margin: 8px 0 0;
+  color: #647067;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.round-stats-empty-state {
+  margin-top: 16px;
+  padding: 22px;
+}
+
+.round-stats-empty-state h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.round-stats-empty-state > p:only-child {
+  margin-top: 0;
+}
+
+.round-stats-teams {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.round-stats-team {
+  overflow: hidden;
+}
+
+.round-stats-team--blue {
+  border-top: 4px solid #2563eb;
+}
+
+.round-stats-team--black {
+  border-top: 4px solid #222b25;
+}
+
+.round-stats-team__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px;
+}
+
+.round-stats-team__heading h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.round-stats-team__heading span {
+  color: #647067;
+  font-size: 0.75rem;
+}
+
+.round-stats-player-list {
+  padding: 0 18px 10px;
+}
+
+.round-stats-player-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid #edf0ed;
+}
+
+.round-stats-player__identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.round-stats-player__identity > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.round-stats-player__identity strong {
+  overflow: hidden;
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.round-stats-fields,
+.round-stats-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.round-stats-fields--goalkeeper,
+.round-stats-values--goalkeeper {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.round-stats-fields label {
+  display: grid;
+  gap: 7px;
+  color: #647067;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.round-stats-fields input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 6px;
+  border: 1px solid #dce2dd;
+  border-radius: 12px;
+  background: #f8faf8;
+  color: #18201b;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.round-stats-fields input:focus {
+  border-color: #268c4b;
+  outline: 3px solid rgb(38 140 75 / 12%);
+}
+
+.round-stats-fields input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.round-stats-values > div {
+  padding: 11px 8px;
+  border-radius: 12px;
+  background: #f3f6f4;
+  text-align: center;
+}
+
+.round-stats-values span,
+.round-stats-values strong {
+  display: block;
+}
+
+.round-stats-values span {
+  color: #647067;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.round-stats-values strong {
+  margin-top: 4px;
+  font-size: 1rem;
+}
+
+.round-stats-save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.round-stats-feedback {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.round-stats-feedback--success {
+  background: #ecf8ef;
+  color: #1d753d;
+}
+
+.round-stats-feedback--error {
+  background: #f5eeee;
+  color: #a33d3d;
+}
+
 .history-section {
   margin-top: 28px;
 }

@@ -362,6 +362,14 @@ export function GamesPage({
           )}
       </section>
 
+      <Link
+        className="stats-cta-link"
+        to="/jogos/estatisticas"
+      >
+        <span>Estatísticas da rodada</span>
+        <span aria-hidden="true">→</span>
+      </Link>
+
       <section className="evaluation-cta-card">
         <p className="eyebrow">Avaliações</p>
         <h2>

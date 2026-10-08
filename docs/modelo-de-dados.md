@@ -155,6 +155,22 @@ A ausência de um registro em `round_results` representa uma rodada cujo placar 
 
 O histórico do grupo é derivado das rodadas em `rounds` e de seus placares opcionais em `round_results`, sem duplicar esses dados em outra entidade.
 
+### round_player_stats
+
+Armazena as estatísticas individuais de cada participante em uma rodada:
+
+- `round_id`: rodada relacionada
+- `player_id`: jogador participante
+- `goals`: gols marcados
+- `assists`: assistências realizadas
+- `goalkeeper_saves`: defesas realizadas como goleiro
+- `updated_by`: administrador responsável pela última alteração
+- `updated_at`: momento da última atualização
+
+A combinação de `round_id` e `player_id` forma a chave primária. A mesma combinação também referencia obrigatoriamente `round_assignments`, portanto somente participantes da formação podem possuir estatísticas naquela rodada.
+
+Vitória, empate e derrota serão derivados posteriormente a partir da formação e do resultado da rodada; esses dados não são registrados manualmente em `round_player_stats`.
+
 ### round_evaluations
 
 Armazena as avaliações feitas entre os participantes de uma rodada.
@@ -179,8 +195,3 @@ Os votos individuais permanecem privados. Depois do encerramento, as médias sã
 O ranking do grupo utiliza somente agregados seguros de `round_evaluations` pertencentes a rodadas com avaliação encerrada. Os votos individuais continuam privados, e o mínimo de três avaliações também se aplica à média pública do ranking.
 
 O encerramento ocorre no prazo definido por `evaluation_closes_at` ou pode ser antecipado por um administrador, registrando o momento em `evaluation_closed_at`. Não há reabertura nessa primeira versão.
-
-## Entidades planejadas para versões futuras
-
-### round_player_stats
-Gols, assistências e defesas por jogador e rodada.

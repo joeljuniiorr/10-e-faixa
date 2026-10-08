@@ -14,6 +14,7 @@ import { PlayerPage } from './pages/PlayerPage'
 import { GamesPage } from './pages/GamesPage'
 import { EvaluationPage } from './pages/EvaluationPage'
 import { HistoryPage } from './pages/HistoryPage'
+import { RoundStatsPage } from './pages/RoundStatsPage'
 import { supabase } from './lib/supabase'
 import type {
   ConfirmationStatus,
@@ -1006,6 +1007,26 @@ return (
         replace
         />
         )
+        }
+      />
+
+      <Route
+        path="/jogos/estatisticas"
+        element={
+          authStatus === 'authenticated' ? (
+            <RoundStatsPage
+              roundId={activeRoundId ?? null}
+              currentPlayerId={
+                authenticatedPlayer?.id ?? null
+              }
+              players={players}
+              assignments={roundAssignments}
+              isAdmin={currentPlayer?.role === 'admin'}
+              isResultsOpen={isResultsOpen}
+            />
+          ) : (
+            <Navigate to="/entrar" replace />
+          )
         }
       />
 
