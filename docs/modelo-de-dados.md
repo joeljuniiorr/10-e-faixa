@@ -169,7 +169,9 @@ Armazena as estatísticas individuais de cada participante em uma rodada:
 
 A combinação de `round_id` e `player_id` forma a chave primária. A mesma combinação também referencia obrigatoriamente `round_assignments`, portanto somente participantes da formação podem possuir estatísticas naquela rodada.
 
-Vitória, empate e derrota serão derivados posteriormente a partir da formação e do resultado da rodada; esses dados não são registrados manualmente em `round_player_stats`.
+As estatísticas acumuladas de um jogador no grupo são derivadas de `round_assignments`, `round_results` e `round_player_stats`. Uma partida só entra na contagem quando existe um registro correspondente em `round_results`.
+
+Vitórias, empates e derrotas não são armazenados manualmente. Esses valores são derivados pelo time registrado para o jogador em `round_assignments` e pelo placar da rodada em `round_results`.
 
 ### round_evaluations
 

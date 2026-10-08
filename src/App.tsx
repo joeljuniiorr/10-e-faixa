@@ -1095,6 +1095,7 @@ return (
         path="/jogadores/:playerId"
         element={  authStatus === 'authenticated' ? (
           <PlayerPage
+            groupId={activeGroup?.id ?? null}
             players={players}
             assignments={roundAssignments}
             roundResult={roundResult}
