@@ -86,6 +86,9 @@ const [
 const activeRoundIdRef =
   useRef<string | undefined>(undefined)
 
+const assignmentMaterializationAttemptsRef =
+  useRef<Set<string>>(new Set())
+
 const activeRoundId = activeRound?.id
 
 const activeGroup =
@@ -499,8 +502,95 @@ useEffect(() => {
     }
 
     if (data.length === 0) {
+      const initialAssignments =
+        createInitialRoundAssignments(players)
+
+      setRoundAssignments(initialAssignments)
+
+      if (
+        currentPlayer?.role !== 'admin' ||
+        initialAssignments.length === 0 ||
+        assignmentMaterializationAttemptsRef.current.has(
+          activeRoundId,
+        )
+      ) {
+        return
+      }
+
+      assignmentMaterializationAttemptsRef.current.add(
+        activeRoundId,
+      )
+
+      const updatedAt = new Date().toISOString()
+      const { error: materializationError } = await supabase
+        .from('round_assignments')
+        .upsert(
+          initialAssignments.map((assignment) => ({
+            round_id: activeRoundId,
+            player_id: assignment.playerId,
+            team: assignment.team,
+            position: assignment.position,
+            updated_at: updatedAt,
+          })),
+          {
+            onConflict: 'round_id,player_id',
+            ignoreDuplicates: true,
+          },
+        )
+
+      if (materializationError) {
+        console.error(
+          'Erro ao materializar formação inicial da rodada:',
+          materializationError,
+        )
+        return
+      }
+
+      if (ignoreResult) {
+        return
+      }
+
+      const {
+        data: persistedAssignments,
+        error: persistedAssignmentsError,
+      } = await supabase
+        .from('round_assignments')
+        .select('player_id, team, position')
+        .eq('round_id', activeRoundId)
+        .overrideTypes<
+          RoundAssignmentRow[],
+          { merge: false }
+        >()
+
+      if (ignoreResult) {
+        return
+      }
+
+      if (persistedAssignmentsError) {
+        console.error(
+          'Erro ao confirmar materialização da formação da rodada:',
+          persistedAssignmentsError,
+        )
+        return
+      }
+
+      if (persistedAssignments.length === 0) {
+        console.error(
+          'A materialização da formação da rodada não retornou registros persistidos.',
+        )
+        return
+      }
+
+      if (activeRoundIdRef.current !== activeRoundId) {
+        return
+      }
+
       setRoundAssignments(
-        createInitialRoundAssignments(players),
+        persistedAssignments.map((assignment) => ({
+          playerId: assignment.player_id,
+          team: assignment.team,
+          position: assignment.position,
+        })),
       )
       return
     }
@@ -519,7 +609,7 @@ useEffect(() => {
   return () => {
     ignoreResult = true
   }
-}, [activeRoundId, players])
+}, [activeRoundId, currentPlayer?.role, players])
 
 useEffect(() => {
   let ignoreResult = false
@@ -580,6 +670,7 @@ useEffect(() => {
 
       if (event === 'SIGNED_OUT') {
         activeRoundIdRef.current = undefined
+        assignmentMaterializationAttemptsRef.current.clear()
         setActiveRound(null)
         setAuthenticatedPlayer(null)
         setAuthenticatedGroupMemberships([])
@@ -671,6 +762,7 @@ function handleAuthenticated(
 
 function handleSignedOut() {
   activeRoundIdRef.current = undefined
+  assignmentMaterializationAttemptsRef.current.clear()
   setAuthenticatedPlayer(null)
   setAuthenticatedGroupMemberships([])
   setPlayers([])

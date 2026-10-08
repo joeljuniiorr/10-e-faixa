@@ -127,6 +127,10 @@ A formação pode ser alterada pelo administrador sem criar novos registros para
 
 As quantidades específicas de jogadores por time e posição serão tratadas pelas regras da aplicação nesta primeira versão.
 
+Uma rodada recém-criada pode inicialmente não possuir registros em `round_assignments`. Quando um administrador carrega essa rodada, a formação fallback exibida pelo frontend é materializada automaticamente na tabela. Depois dessa materialização, os registros persistidos passam a ser a fonte oficial e não são recriados nem sobrescritos pelo fallback.
+
+Essa materialização garante que avaliações e futuras estatísticas possam identificar de forma consistente os participantes reais da rodada.
+
 ### round_results
 
 Armazena o placar final de uma rodada.
